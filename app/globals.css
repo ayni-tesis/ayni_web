@@ -1,0 +1,156 @@
+@import "tailwindcss";
+
+@theme {
+  /* Brand colors */
+  --color-primary: #04a033;
+  --color-secondary: #ddffe7;
+
+  /* State colors */
+  --color-info: #c2bfbf;
+  --color-success: #27ae60;
+  --color-warning: #e2b93b;
+  --color-error: #eb5757;
+
+  /* Black scale */
+  --color-black-1: #000000;
+  --color-black-2: #1d1d1d;
+  --color-black-3: #282828;
+
+  /* Gray scale (override default Tailwind grays) */
+  --color-gray-1: #333333;
+  --color-gray-2: #4f4f4f;
+  --color-gray-3: #828282;
+  --color-gray-4: #bdbdbd;
+  --color-gray-5: #e0e0e0;
+
+  /* Typography */
+  --font-sans: var(--font-nunito), system-ui, sans-serif;
+
+  --text-h1: 56px;
+  --text-h1--line-height: 61.6px;
+  --text-h1--font-weight: 700;
+
+  --text-h2: 48px;
+  --text-h2--line-height: 52.8px;
+  --text-h2--font-weight: 700;
+
+  --text-h3: 40px;
+  --text-h3--line-height: 44px;
+  --text-h3--font-weight: 700;
+
+  --text-h4: 32px;
+  --text-h4--line-height: 35.2px;
+  --text-h4--font-weight: 700;
+
+  --text-h5: 24px;
+  --text-h5--line-height: 26.4px;
+  --text-h5--font-weight: 700;
+
+  --text-h6: 20px;
+  --text-h6--line-height: 22px;
+  --text-h6--font-weight: 700;
+
+  --text-lg: 20px;
+  --text-lg--line-height: 28px;
+
+  --text-md: 18px;
+  --text-md--line-height: 25.2px;
+
+  --text-base: 16px;
+  --text-base--line-height: 22.4px;
+
+  --text-sm: 14px;
+  --text-sm--line-height: 19.6px;
+
+  /* Spacing scale (AYNI) */
+  --spacing-s1: 8px;
+  --spacing-s2: 16px;
+  --spacing-s3: 24px;
+  --spacing-s4: 32px;
+  --spacing-s5: 40px;
+  --spacing-s6: 56px;
+  --spacing-s7: 72px;
+  --spacing-s8: 80px;
+  --spacing-s9: 96px;
+  --spacing-s10: 120px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 320ms;
+}
+
+html,
+body {
+  background-color: var(--color-gray-5);
+  color: var(--color-black-2);
+  font-family: var(--font-sans);
+}
+
+/* Press feedback — apply via .press class on any clickable */
+.press {
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+.press:active {
+  transform: scale(0.97);
+}
+
+/* Sliding nav accent (used by sidebar) */
+.nav-accent {
+  transition: top var(--duration-base) var(--ease-out);
+}
+
+/* Focus ring tuned to brand */
+.focus-ring:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Notification dot soft pulse */
+@keyframes dot-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(0.92);
+  }
+}
+.dot-pulse {
+  animation: dot-pulse 1.6s ease-in-out infinite;
+}
+
+/* Top progress bar (indeterminate) */
+@keyframes top-progress {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(20%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+.top-progress {
+  animation: top-progress 1.2s var(--ease-in-out) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+    scroll-behavior: auto;
+  }
+  .press:active {
+    transform: none;
+  }
+}
