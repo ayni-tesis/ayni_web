@@ -1,3 +1,4 @@
+import { clearSession, getToken } from "@/lib/auth/session";
 import type { ApiError } from "./types";
 
 const API_BASE_URL =
@@ -6,11 +7,17 @@ const API_BASE_URL =
 type FetchOptions = Omit<RequestInit, "body"> & {
   body?: unknown;
   searchParams?: Record<string, string | number | boolean | undefined>;
+  /** Si es true, un 401 NO redirige a /login (útil en la propia pantalla de login). */
+  skipAuthRedirect?: boolean;
 };
 
-function getAuthToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return window.localStorage.getItem("ayni.accessToken");
+/** Sesión expirada/ inválida: limpia el token y manda al login (una sola vez). */
+function handleUnauthorized(): void {
+  if (typeof window === "undefined") return;
+  clearSession();
+  if (window.location.pathname !== "/login") {
+    window.location.assign("/login");
+  }
 }
 
 function buildUrl(
@@ -31,9 +38,9 @@ export async function apiFetch<T>(
   path: string,
   options: FetchOptions = {},
 ): Promise<T> {
-  const { body, searchParams, headers, ...rest } = options;
+  const { body, searchParams, headers, skipAuthRedirect, ...rest } = options;
 
-  const token = getAuthToken();
+  const token = getToken();
   const finalHeaders: Record<string, string> = {
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -47,6 +54,9 @@ export async function apiFetch<T>(
   });
 
   if (!response.ok) {
+    if (response.status === 401 && !skipAuthRedirect) {
+      handleUnauthorized();
+    }
     const error: ApiError = await response
       .json()
       .catch(() => ({ status: response.status, message: response.statusText }));

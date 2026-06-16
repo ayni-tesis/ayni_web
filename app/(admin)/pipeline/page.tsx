@@ -12,7 +12,6 @@ import {
   Server,
   Smartphone,
 } from "lucide-react";
-import { useState } from "react";
 import { PageHeader } from "@/components/admin/page-header";
 import { t } from "@/lib/i18n/es";
 
@@ -56,29 +55,7 @@ const INITIAL_MODEL_HISTORY = [
 ];
 
 export default function PipelinePage() {
-  const [modelHistory, setModelHistory] = useState(INITIAL_MODEL_HISTORY);
-  const [rollbackStatus, setRollbackStatus] = useState<string | null>(null);
-
-  const handleRollback = (version: string) => {
-    setRollbackStatus(
-      `Rollback a versión ${version} iniciado. Ejecutando tests de integración...`,
-    );
-    setTimeout(() => {
-      setRollbackStatus(null);
-      // Switch v2.1 to ROLLBACKED, and v2.0 to PRODUCTION (just a simulation of rollback)
-      setModelHistory((prev) =>
-        prev.map((m) => {
-          if (m.version.startsWith("v2.1")) {
-            return { ...m, status: "ROLLBACKED", version: "v2.1" };
-          }
-          if (m.version.startsWith("v2.0")) {
-            return { ...m, status: "PRODUCTION", version: "v2.0 (Activo)" };
-          }
-          return m;
-        }),
-      );
-    }, 2500);
-  };
+  const modelHistory = INITIAL_MODEL_HISTORY;
 
   return (
     <div className="flex flex-col gap-s3">
@@ -87,12 +64,18 @@ export default function PipelinePage() {
         description={t.pipelinePage.description}
       />
 
-      {rollbackStatus && (
-        <div className="bg-warning/10 border border-warning/30 text-gray-1 p-s2 rounded-xl flex items-center gap-s2">
-          <div className="h-5 w-5 rounded-full border-2 border-warning border-t-transparent animate-spin shrink-0" />
-          <span className="text-sm font-bold">{rollbackStatus}</span>
+      <div className="bg-secondary/40 border border-primary/20 text-gray-1 p-s2 rounded-xl flex items-start gap-s2">
+        <Info size={18} className="shrink-0 mt-0.5 text-primary" />
+        <div className="flex flex-col gap-s1 text-sm">
+          <span className="font-bold text-primary">Próximamente</span>
+          <span className="leading-relaxed text-gray-2">
+            El versionado de modelos y el control de despliegues aún no están
+            conectados al <code>ml-model-service</code>. Las métricas y el
+            historial que se muestran son ilustrativos; la reversión de versiones
+            está deshabilitada hasta integrar el registro de modelos.
+          </span>
         </div>
-      )}
+      </div>
 
       {/* Visual Pipeline Stage Connection Flow */}
       <div className="bg-white rounded-2xl border border-gray-5 p-s3 flex flex-col gap-s2">
@@ -396,8 +379,9 @@ export default function PipelinePage() {
                     !m.version.includes("v1.4") ? (
                       <button
                         type="button"
-                        onClick={() => handleRollback(m.version.split(" ")[0])}
-                        className="press h-8 px-3 rounded-full border border-error/20 text-error hover:bg-error/5 text-xs font-bold flex items-center gap-1.5 transition-colors ml-auto"
+                        disabled
+                        title="Reversión de versiones: próximamente"
+                        className="h-8 px-3 rounded-full border border-gray-5 text-gray-3 text-xs font-bold flex items-center gap-1.5 ml-auto opacity-60 cursor-not-allowed"
                       >
                         <RotateCcw size={12} />
                         Revertir
