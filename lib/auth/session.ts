@@ -27,6 +27,14 @@ export function setSession(args: {
   localStorage.setItem(USER_KEY, JSON.stringify(args.user));
 }
 
+/** Actualiza parcialmente el usuario guardado (p. ej. tras editar el perfil). */
+export function updateSessionUser(patch: Partial<SessionUser>): void {
+  if (typeof window === "undefined") return;
+  const current = getUser();
+  if (!current) return;
+  localStorage.setItem(USER_KEY, JSON.stringify({ ...current, ...patch }));
+}
+
 export function clearSession(): void {
   if (typeof window === "undefined") return;
   localStorage.removeItem(TOKEN_KEY);

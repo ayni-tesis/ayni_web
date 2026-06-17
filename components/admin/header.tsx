@@ -1,8 +1,9 @@
 "use client";
 
-import { Bell, LogOut, Search, Settings, Sprout, User } from "lucide-react";
+import { LogOut, Search, Settings, Sprout, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { NotificationsMenu } from "@/components/admin/notifications-menu";
 import { Kbd } from "@/components/ui/kbd";
 import { ROLE_LABELS } from "@/lib/api/users";
 import type { SearchResult } from "@/lib/api/search";
@@ -105,18 +106,13 @@ export function Header() {
       </div>
 
       <div className="flex items-center gap-2 shrink-0">
-        <button
-          type="button"
-          aria-label={t.common.notifications}
-          className="press focus-ring relative h-10 w-10 rounded-full flex items-center justify-center text-gray-2 hover:bg-gray-5 transition-colors"
-        >
-          <Bell size={20} />
-          <span aria-hidden className="dot-pulse absolute top-2 right-2 w-2 h-2 rounded-full bg-error" />
-        </button>
+        <NotificationsMenu />
 
         <button
           type="button"
           aria-label={t.common.settings}
+          title="Configuración"
+          onClick={() => router.push("/configuracion")}
           className="press focus-ring h-10 w-10 rounded-full flex items-center justify-center text-gray-2 hover:bg-gray-5 transition-colors"
         >
           <Settings size={20} />

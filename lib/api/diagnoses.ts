@@ -46,6 +46,29 @@ export type ZoneStat = {
   count: number;
 };
 
+/**
+ * Detalle de un diagnóstico (diagnosis-service, /api/diagnoses/{id}). Incluye la
+ * imagen original servida con URL SAS temporal. `gradcamImageBase64` solo viene en
+ * el análisis online; para ítems históricos llega null.
+ */
+export type DiagnosisDetail = {
+  id: string;
+  userId: string;
+  pestType: string | null;
+  pestDisplayName: string | null;
+  confidenceScore: number;
+  severityLevel: number | null;
+  source: string | null;
+  recommendation: string | null;
+  imageUrl: string | null;
+  gradcamImageBase64: string | null;
+  latitude: string | null;
+  longitude: string | null;
+  capturedAt: string | null;
+  processedAt: string | null;
+  createdAt: string | null;
+};
+
 export type ListDiagnosesParams = {
   pest?: string;
   dateFrom?: string;
@@ -84,6 +107,10 @@ export const diagnosesService = {
 
   zoneStats(): Promise<ZoneStat[]> {
     return apiFetch<ZoneStat[]>("/reports/stats/zone", { method: "GET" });
+  },
+
+  getById(id: string): Promise<DiagnosisDetail> {
+    return apiFetch<DiagnosisDetail>(`/diagnoses/${id}`, { method: "GET" });
   },
 
   async exportCsv(params: ListDiagnosesParams): Promise<void> {
