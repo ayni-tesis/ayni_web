@@ -30,9 +30,14 @@ Componente/Página  →  Hook (useQuery)  →  Service (real | mock)  →  apiFe
   ```
 - **Query keys:** factories en cada hook (`usersKeys`, `plaguesKeys`) para invalidación de caché.
 
-### ⚠️ Estado real de la integración (crítico)
+### ✅ Estado real de la integración (actualizado 2026-06-16)
 
-Solo **2 de 9 vistas** consumen la capa de API conmutable. Las demás tienen **datos mock hardcodeados *inline* dentro del componente** (arrays `MOCK_*` en el propio `.tsx`), es decir, **aún no llaman a ningún endpoint**. Por eso la tabla de endpoints se divide en dos secciones.
+**Integración COMPLETA.** Las 10 vistas del dashboard + la búsqueda global del header consumen
+endpoints reales del backend vía Gateway. Ya **no queda mock de datos** (`NEXT_PUBLIC_USE_MOCK_API=false`,
+arrays `MOCK_*` y `lib/mock/` eliminados). Única salvedad por diseño: en Pipeline ML las tarjetas de
+modelo son reales (`GET /api/pipeline/models`), pero el **historial de versiones y el rollback** quedan
+como referencia ilustrativa/deshabilitado porque no existe un model registry. La tabla 2.A lista lo
+implementado; la 2.B se conserva como histórico de lo que originalmente faltaba.
 
 ---
 
