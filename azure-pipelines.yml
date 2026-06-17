@@ -1,5 +1,5 @@
 # Pipeline de CI/CD para el dashboard AYNI (Next.js 16) -> Azure App Service
-# Build con pnpm + salida standalone, y deploy a la Web App ayni-web-admin.
+# Build con npm + salida standalone, y deploy a la Web App ayni-web-admin.
 #
 # Antes de la primera ejecución, en Azure DevOps:
 #   1. Crear una service connection de tipo "Azure Resource Manager" y poner
@@ -8,8 +8,8 @@
 #   3. (Opcional) Mover NEXT_PUBLIC_* a un Variable Group si cambian por entorno.
 #
 # Nota importante: las variables NEXT_PUBLIC_* se incrustan en el bundle en
-# BUILD time (no en runtime), por eso se inyectan durante `pnpm build` aquí y
-# no como App Settings del App Service.
+# BUILD time (no en runtime), por eso se inyectan durante `npm run build` aquí
+# y no como App Settings del App Service.
 
 trigger:
   branches:
@@ -18,7 +18,6 @@ trigger:
 
 variables:
   nodeVersion: '24.x'
-  pnpmVersion: '9'
   azureServiceConnection: 'ayni-azure-sc' # <-- nombre de la service connection en Azure DevOps
   webAppName: 'ayni-web-admin'
   # Configuración pública del frontend (se incrusta en el build):
@@ -39,15 +38,10 @@ stages:
               versionSpec: $(nodeVersion)
             displayName: 'Instalar Node.js'
 
-          - script: |
-              corepack enable
-              corepack prepare pnpm@$(pnpmVersion) --activate
-            displayName: 'Activar pnpm'
-
-          - script: pnpm install --frozen-lockfile
+          - script: npm ci
             displayName: 'Instalar dependencias'
 
-          - script: pnpm build
+          - script: npm run build
             displayName: 'Build de producción'
             env:
               NEXT_PUBLIC_API_BASE_URL: $(NEXT_PUBLIC_API_BASE_URL)
