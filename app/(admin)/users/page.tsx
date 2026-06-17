@@ -18,7 +18,12 @@ import { UsersPagination } from "@/components/users/users-pagination";
 import { UsersTable } from "@/components/users/users-table";
 import type { User } from "@/lib/api/types";
 import { useHotkeys } from "@/lib/hooks/use-hotkeys";
-import { useUsers } from "@/lib/hooks/use-users";
+import {
+  useDeleteUser,
+  useResetPassword,
+  useUpdateUser,
+  useUsers,
+} from "@/lib/hooks/use-users";
 import { t } from "@/lib/i18n/es";
 
 const PAGE_SIZE = 4;
@@ -39,11 +44,43 @@ export default function UsersPage() {
 
   const resetPage = useCallback(() => setPage(0), []);
 
-  const handleUserAction = useCallback((action: string, user: User) => {
-    // Aún sin implementar — el menú existe para evitar el placeholder vacío.
-    // TODO: conectar cuando el backend exponga PATCH/DELETE en /api/users/:id
-    console.info("user action", action, user.id);
-  }, []);
+  const updateUser = useUpdateUser();
+  const deleteUser = useDeleteUser();
+  const resetPassword = useResetPassword();
+
+  const handleUserAction = useCallback(
+    (action: string, user: User) => {
+      switch (action) {
+        case "activate":
+          updateUser.mutate({ id: user.id, input: { status: "ACTIVE" } });
+          break;
+        case "deactivate":
+          updateUser.mutate({ id: user.id, input: { status: "INACTIVE" } });
+          break;
+        case "delete":
+          if (
+            window.confirm(
+              `¿Eliminar la cuenta de ${user.fullName}? Esta acción no se puede deshacer.`,
+            )
+          ) {
+            deleteUser.mutate(user.id);
+          }
+          break;
+        case "reset-password":
+          resetPassword.mutate(user.id, {
+            onSuccess: (res) =>
+              window.alert(
+                `Contraseña temporal para ${user.fullName}:\n\n${res.temporaryPassword}\n\nCompártela de forma segura; el usuario deberá cambiarla.`,
+              ),
+          });
+          break;
+        // "view" / "edit": requieren UI de detalle/edición (pendiente).
+        default:
+          break;
+      }
+    },
+    [updateUser, deleteUser, resetPassword],
+  );
 
   const totalPages = data?.totalPages ?? 1;
 

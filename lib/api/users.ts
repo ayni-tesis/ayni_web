@@ -1,24 +1,38 @@
-import { MOCK_USERS } from "@/lib/mock/users";
 import { apiFetch } from "./client";
-import type { ListUsersParams, PageResponse, User, UserRole } from "./types";
+import type {
+  ListUsersParams,
+  PageResponse,
+  User,
+  UserRole,
+  UserStatus,
+} from "./types";
 
 /**
- * Contrato del servicio de usuarios.
- * El backend deberá exponer estos endpoints bajo /api/users cuando esté listo.
- * Para migrar: cambiar NEXT_PUBLIC_USE_MOCK_API=false y la implementación real toma el relevo.
+ * Servicio de gestión de usuarios (panel admin).
+ * Backend real: auth-service vía Gateway, bajo /api/admin/users (solo ADMIN).
  */
+
+export type UpdateUserInput = { role?: UserRole; status?: UserStatus };
+export type CreateUserInput = {
+  email: string;
+  fullName: string;
+  password: string;
+  role: UserRole;
+};
+export type ResetPasswordResult = { temporaryPassword: string };
+
 export type UsersService = {
   list(params: ListUsersParams): Promise<PageResponse<User>>;
   getById(id: string): Promise<User>;
+  update(id: string, input: UpdateUserInput): Promise<User>;
+  remove(id: string): Promise<void>;
+  resetPassword(id: string): Promise<ResetPasswordResult>;
+  create(input: CreateUserInput): Promise<User>;
 };
 
-// ────────────────────────────────────────────────────────────
-// Implementación real (apuntará al API Gateway)
-// ────────────────────────────────────────────────────────────
-
-const realUsersService: UsersService = {
+export const usersService: UsersService = {
   list(params) {
-    return apiFetch<PageResponse<User>>("/users", {
+    return apiFetch<PageResponse<User>>("/admin/users", {
       method: "GET",
       searchParams: {
         page: params.page,
@@ -30,74 +44,29 @@ const realUsersService: UsersService = {
   },
 
   getById(id) {
-    return apiFetch<User>(`/users/${id}`, { method: "GET" });
+    return apiFetch<User>(`/admin/users/${id}`, { method: "GET" });
   },
-};
 
-// ────────────────────────────────────────────────────────────
-// Implementación mock (se elimina cuando el backend esté listo)
-// ────────────────────────────────────────────────────────────
+  update(id, input) {
+    return apiFetch<User>(`/admin/users/${id}`, { method: "PATCH", body: input });
+  },
 
-const SIMULATED_LATENCY_MS = 350;
+  remove(id) {
+    return apiFetch<void>(`/admin/users/${id}`, { method: "DELETE" });
+  },
 
-function delay<T>(value: T): Promise<T> {
-  return new Promise((resolve) =>
-    setTimeout(() => resolve(value), SIMULATED_LATENCY_MS),
-  );
-}
-
-function matchesFilters(user: User, params: ListUsersParams): boolean {
-  if (params.role && params.role !== "ALL" && user.role !== params.role)
-    return false;
-  if (params.search) {
-    const needle = params.search.toLowerCase();
-    const haystack = `${user.fullName} ${user.email}`.toLowerCase();
-    if (!haystack.includes(needle)) return false;
-  }
-  return true;
-}
-
-const mockUsersService: UsersService = {
-  list(params) {
-    const page = params.page ?? 0;
-    const size = params.size ?? 4;
-
-    const filtered = MOCK_USERS.filter((u) => matchesFilters(u, params));
-    const start = page * size;
-    const content = filtered.slice(start, start + size);
-    const totalPages = Math.max(1, Math.ceil(filtered.length / size));
-
-    return delay<PageResponse<User>>({
-      content,
-      page,
-      size,
-      totalElements: filtered.length,
-      totalPages,
-      last: page >= totalPages - 1,
+  resetPassword(id) {
+    return apiFetch<ResetPasswordResult>(`/admin/users/${id}/reset-password`, {
+      method: "POST",
     });
   },
 
-  getById(id) {
-    const user = MOCK_USERS.find((u) => u.id === id);
-    if (!user) {
-      return Promise.reject({ status: 404, message: "User not found" });
-    }
-    return delay(user);
+  create(input) {
+    return apiFetch<User>("/admin/users", { method: "POST", body: input });
   },
 };
 
-// ────────────────────────────────────────────────────────────
-// Selector
-// ────────────────────────────────────────────────────────────
-
-const useMock = process.env.NEXT_PUBLIC_USE_MOCK_API !== "false";
-
-export const usersService: UsersService = useMock
-  ? mockUsersService
-  : realUsersService;
-
-// Helpers de UI — labels en español peruano.
-// Las claves del backend permanecen en inglés (FARMER/AGRONOMIST/ADMIN).
+// Helpers de UI — labels en español. Las claves del backend permanecen en inglés.
 import { t } from "@/lib/i18n/es";
 
 export const ROLE_LABELS: Record<UserRole, string> = {

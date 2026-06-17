@@ -1,21 +1,100 @@
-# Node.js with React
-# Build a Node.js project that uses React.
-# Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+# Pipeline de CI/CD para el dashboard AYNI (Next.js 16) -> Azure App Service
+# Build con pnpm + salida standalone, y deploy a la Web App ayni-web-admin.
+#
+# Antes de la primera ejecución, en Azure DevOps:
+#   1. Crear una service connection de tipo "Azure Resource Manager" y poner
+#      su nombre en la variable `azureServiceConnection` (abajo).
+#   2. La Web App `ayni-web-admin` es Linux con runtime Node 24 LTS.
+#   3. (Opcional) Mover NEXT_PUBLIC_* a un Variable Group si cambian por entorno.
+#
+# Nota importante: las variables NEXT_PUBLIC_* se incrustan en el bundle en
+# BUILD time (no en runtime), por eso se inyectan durante `pnpm build` aquí y
+# no como App Settings del App Service.
 
 trigger:
-- main
+  branches:
+    include:
+      - main
 
-pool:
-  vmImage: ubuntu-latest
+variables:
+  nodeVersion: '24.x'
+  pnpmVersion: '9'
+  azureServiceConnection: 'ayni-azure-sc' # <-- nombre de la service connection en Azure DevOps
+  webAppName: 'ayni-web-admin'
+  # Configuración pública del frontend (se incrusta en el build):
+  NEXT_PUBLIC_API_BASE_URL: 'https://api-gateway.yellowocean-a28491f5.eastus.azurecontainerapps.io/api'
+  NEXT_PUBLIC_USE_MOCK_API: 'false'
 
-steps:
-- task: NodeTool@0
-  inputs:
-    versionSpec: '20.x'
-  displayName: 'Install Node.js'
+stages:
+  - stage: Build
+    displayName: 'Build Next.js'
+    jobs:
+      - job: build
+        displayName: 'Compilar y empaquetar'
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: $(nodeVersion)
+            displayName: 'Instalar Node.js'
 
-- script: |
-    npm install
-    npm run build
-  displayName: 'npm install and build'
+          - script: |
+              corepack enable
+              corepack prepare pnpm@$(pnpmVersion) --activate
+            displayName: 'Activar pnpm'
+
+          - script: pnpm install --frozen-lockfile
+            displayName: 'Instalar dependencias'
+
+          - script: pnpm build
+            displayName: 'Build de producción'
+            env:
+              NEXT_PUBLIC_API_BASE_URL: $(NEXT_PUBLIC_API_BASE_URL)
+              NEXT_PUBLIC_USE_MOCK_API: $(NEXT_PUBLIC_USE_MOCK_API)
+
+          # El output standalone no incluye assets estáticos ni /public:
+          # hay que copiarlos junto al server.js.
+          - script: |
+              cp -r .next/static .next/standalone/.next/static
+              cp -r public .next/standalone/public
+            displayName: 'Ensamblar artefacto standalone'
+
+          - task: ArchiveFiles@2
+            inputs:
+              rootFolderOrFile: '.next/standalone'
+              includeRootFolder: false
+              archiveType: 'zip'
+              archiveFile: '$(Build.ArtifactStagingDirectory)/app.zip'
+              replaceExistingArchive: true
+            displayName: 'Comprimir artefacto'
+
+          - publish: '$(Build.ArtifactStagingDirectory)/app.zip'
+            artifact: 'web'
+            displayName: 'Publicar artefacto'
+
+  - stage: Deploy
+    displayName: 'Deploy a App Service'
+    dependsOn: Build
+    condition: succeeded()
+    jobs:
+      - deployment: deploy
+        displayName: 'Desplegar ayni-web-admin'
+        pool:
+          vmImage: 'ubuntu-latest'
+        environment: 'ayni-web-admin'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: AzureWebApp@1
+                  inputs:
+                    azureSubscription: $(azureServiceConnection)
+                    appType: 'webAppLinux'
+                    appName: $(webAppName)
+                    package: '$(Pipeline.Workspace)/web/app.zip'
+                    runtimeStack: 'NODE|24-lts'
+                    startUpCommand: 'node server.js'
+                    # Servimos un build ya hecho: desactivamos el build remoto (Oryx).
+                    appSettings: '-SCM_DO_BUILD_DURING_DEPLOYMENT false -ENABLE_ORYX_BUILD false'
+                  displayName: 'Desplegar a Azure App Service'
