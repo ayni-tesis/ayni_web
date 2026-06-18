@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Qué es esto
 
-Dashboard de operaciones del sistema **AYNI** (detección temprana de plagas en café, Villa Rica / Pasco). NO es la app del caficultor — es la herramienta interna para administradores de cooperativas, agrónomos, investigadores y técnicos SENASA: validar imágenes, consultar diagnósticos, generar reportes SENASA, monitorear el pipeline ML y auditar usuarios.
+Dashboard de operaciones del sistema **AYNI** (detección temprana de plagas en café). NO es la app del caficultor — es la herramienta interna para administradores de cooperativas, agrónomos, investigadores y técnicos SENASA: validar imágenes, consultar diagnósticos, generar reportes SENASA, monitorear el pipeline ML y auditar usuarios.
 
 `PRODUCT.md` es la fuente de verdad de marca, personas y principios de diseño. **Léelo antes de cualquier trabajo de UI** — define decisiones no negociables (ver §Diseño abajo).
 

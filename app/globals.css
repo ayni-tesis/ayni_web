@@ -5,6 +5,11 @@
   --color-primary: #04a033;
   --color-secondary: #ddffe7;
 
+  /* Surface brand colors (paleta cream + forest de PRODUCT.md) */
+  --color-forest: #07321d;
+  --color-forest-2: #0a4226;
+  --color-cream: #f6f3ea;
+
   /* State colors */
   --color-info: #c2bfbf;
   --color-success: #27ae60;
@@ -141,11 +146,27 @@ body {
   animation: top-progress 1.2s var(--ease-in-out) infinite;
 }
 
+/* Entrada suave escalonada (login y vistas de bienvenida) */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-rise {
+  animation: rise var(--duration-slow) var(--ease-out) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms;
+    animation-delay: 0ms !important;
     animation-iteration-count: 1;
     transition-duration: 0.01ms;
     scroll-behavior: auto;

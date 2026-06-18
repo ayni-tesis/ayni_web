@@ -28,9 +28,9 @@ Dashboard de operaciones del sistema AYNI — la interfaz que permite a los huma
 
 **Confiable · técnico · arraigado.**
 
-- **Confiable**: las decisiones que se toman aquí afectan cosechas reales en Villa Rica. La UI nunca debe sugerir un nivel de certeza que no tiene; etiquetas claras, estados explícitos, sin ambigüedad.
+- **Confiable**: las decisiones que se toman aquí afectan cosechas reales. La UI nunca debe sugerir un nivel de certeza que no tiene; etiquetas claras, estados explícitos, sin ambigüedad.
 - **Técnico**: los usuarios saben de café y de fitosanidad. La interfaz puede usar `Hemileia vastatrix` sin disculparse, mostrar F1-score, exponer versiones del modelo. No simplificar para abajo.
-- **Arraigado**: AYNI es una palabra quechua (reciprocidad). El producto no es un SaaS global genérico; nace en Pasco y se queda en Pasco. Pequeños detalles del lenguaje y la imagen direction recuerdan eso.
+- **Arraigado**: AYNI es una palabra quechua (reciprocidad). El producto no es un SaaS global genérico; nace del trabajo en campo y habla el lenguaje de quien lo usa. Pequeños detalles del lenguaje y la imagen direction recuerdan eso.
 
 Voz: clara, directa, sin marketing-speak. Los números hablan; los adjetivos no.
 
@@ -53,7 +53,7 @@ Lo que AYNI **no** debe parecer:
 
 4. **Un solo verde.** El primary `#04A033` solo se gana cuando hay un significado activo (estado positivo, CTA, item seleccionado). Si todo es verde, nada es verde. El resto del sistema vive en cream + forest + grays.
 
-5. **Bilingüe sin fricción.** Strings de UI en español (los usuarios son peruanos), terminología técnica en su forma estándar (FARMER/AGRONOMIST/ADMIN en código, "Caficultor / Agrónomo / Admin" en pantalla). El idioma del producto sigue al usuario, no al stack.
+5. **Bilingüe sin fricción.** Strings de UI en español (los usuarios hablan español), terminología técnica en su forma estándar (FARMER/AGRONOMIST/ADMIN en código, "Caficultor / Agrónomo / Admin" en pantalla). El idioma del producto sigue al usuario, no al stack.
 
 ## Accessibility & Inclusion
 

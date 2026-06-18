@@ -30,6 +30,39 @@ export const t = {
     },
   },
 
+  login: {
+    brandName: "AYNI",
+    brandSuffix: "Admin",
+    panelTitle: "Adelántate a la plaga, hoja por hoja.",
+    panelMeaning:
+      "Ayni es reciprocidad en quechua: el trabajo que se devuelve. Aquí, tu criterio mejora cada diagnóstico que vuelve al campo.",
+    panelPoints: [
+      "Revisa y corrige lo que el modelo no vio claro.",
+      "Vigila la precisión del modelo y cada versión nueva.",
+      "Arma reportes para SENASA en un par de clics.",
+    ],
+    panelTagline: "Vigilancia fitosanitaria del café, con criterio humano.",
+    formTitle: "Iniciar sesión",
+    formSubtitle: "Ingresa con tu cuenta de administrador o agrónomo.",
+    emailLabel: "Correo electrónico",
+    emailPlaceholder: "admin@ayni.pe",
+    passwordLabel: "Contraseña",
+    passwordPlaceholder: "••••••••",
+    showPassword: "Mostrar contraseña",
+    hidePassword: "Ocultar contraseña",
+    submit: "Iniciar sesión",
+    submitting: "Ingresando…",
+    restricted: "Acceso restringido a personal autorizado de AYNI.",
+    legal:
+      "Datos tratados conforme a la Ley N.º 29733 de Protección de Datos Personales.",
+    errors: {
+      roleNotAllowed: "Este panel es solo para administradores o agrónomos.",
+      invalidCredentials:
+        "Credenciales inválidas. Verifica tu correo y contraseña.",
+      generic: "No se pudo iniciar sesión. Intenta de nuevo.",
+    },
+  },
+
   header: {
     searchPlaceholder: "Buscar plagas, caficultores, alertas…",
     searchHint: "Presiona / para buscar",
@@ -165,7 +198,7 @@ export const t = {
     },
     recentDiagnoses: "Diagnósticos recientes",
     recentDiagnosesDesc:
-      "Últimas detecciones sincronizadas desde el campo en Villa Rica.",
+      "Lo último que llegó del campo, recién sincronizado.",
     systemStatus: "Estado de servicios",
     systemStatusDesc: "Salud e infraestructura en vivo.",
   },

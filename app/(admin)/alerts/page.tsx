@@ -152,7 +152,7 @@ function CreateRuleForm({ onClose, onCreate, pending, error }: {
         onSubmit={(e) => { e.preventDefault(); onCreate({ name, pestType: pestType || null, severityThreshold: thresholdPct / 100, zone: zone || null, recipients: recipients || null, status: "ACTIVE" }); }}
         className="grid grid-cols-1 md:grid-cols-2 gap-s2"
       >
-        <Field label="Nombre"><input required value={name} onChange={(e) => setName(e.target.value)} className="h-11 w-full px-4 rounded-xl border border-gray-5 bg-gray-5/50 text-sm font-bold outline-none focus:ring-2 focus:ring-primary" placeholder="Roya severa Villa Rica" /></Field>
+        <Field label="Nombre"><input required value={name} onChange={(e) => setName(e.target.value)} className="h-11 w-full px-4 rounded-xl border border-gray-5 bg-gray-5/50 text-sm font-bold outline-none focus:ring-2 focus:ring-primary" placeholder="Roya severa sector norte" /></Field>
         <Field label="Plaga"><select value={pestType} onChange={(e) => setPestType(e.target.value)} className="h-11 w-full px-4 rounded-xl border border-gray-5 bg-gray-5/50 text-sm font-bold outline-none focus:ring-2 focus:ring-primary">{PEST_FILTER_OPTIONS.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}</select></Field>
         <Field label={`Umbral de severidad: ${thresholdPct}%`}><input type="range" min={0} max={100} value={thresholdPct} onChange={(e) => setThresholdPct(Number(e.target.value))} className="w-full" /></Field>
         <Field label="Zona (opcional)"><input value={zone} onChange={(e) => setZone(e.target.value)} className="h-11 w-full px-4 rounded-xl border border-gray-5 bg-gray-5/50 text-sm font-bold outline-none focus:ring-2 focus:ring-primary" placeholder="Sector San Miguel" /></Field>

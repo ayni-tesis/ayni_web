@@ -13,7 +13,7 @@ const nunito = Nunito({
 export const metadata: Metadata = {
   title: "AYNI Admin",
   description:
-    "Panel administrativo del sistema AYNI — detección temprana de plagas en café",
+    "Panel administrativo del sistema AYNI: detección temprana de plagas en café",
 };
 
 export default function RootLayout({

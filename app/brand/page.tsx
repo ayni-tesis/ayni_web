@@ -52,13 +52,13 @@ function BrandHeader() {
     <div className="max-w-[1440px] mx-auto mb-8 flex items-end justify-between text-white">
       <div>
         <p className="text-[10px] font-bold tracking-[0.3em] uppercase opacity-60">
-          AYNI — Identity System
+          AYNI · Identity System
         </p>
         <h1 className="text-h4 font-bold mt-2">Brand Guidelines · v1.0</h1>
       </div>
       <p className="text-sm opacity-60 max-w-xs text-right">
         Visión computacional offline-first para la detección temprana de plagas
-        en hojas de café. Villa Rica, Perú.
+        en hojas de café.
       </p>
     </div>
   );
@@ -165,7 +165,7 @@ function TaglinePanel() {
         </div>
         <p className="text-sm leading-relaxed max-w-xs text-white/85">
           Ayni significa reciprocidad en quechua. Detectamos a tiempo lo que la
-          hoja calla — y devolvemos al caficultor el cuidado de su cosecha.
+          hoja calla y le devolvemos al caficultor el cuidado de su cosecha.
         </p>
       </div>
     </Panel>
@@ -347,7 +347,7 @@ function PhysicalApplicationPanel() {
               letterSpacing="4"
             >
               <textPath href="#circlePath" startOffset="0">
-                AYNI · CUIDA CADA HOJA · VILLA RICA · 2026 ·
+                AYNI · CUIDA CADA HOJA · 2026 ·
               </textPath>
             </text>
           </svg>
@@ -417,11 +417,9 @@ function ImageDirectionPanel() {
         </svg>
         <div className="absolute bottom-3 left-6 right-6 flex items-end justify-between">
           <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/70">
-            Selva alta · Pasco
+            Cafetales de altura
           </p>
-          <p className="text-[10px] font-mono text-white/40">
-            -10.71°, -75.35°
-          </p>
+          <p className="text-[10px] font-mono text-white/40">Luz natural</p>
         </div>
       </div>
     </Panel>
