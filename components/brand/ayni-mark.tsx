@@ -1,55 +1,73 @@
 type AyniMarkProps = {
   size?: number;
-  fill?: string;
+  background?: string | null;
+  faceColor?: string;
+  featureColor?: string;
   veinColor?: string;
+  /** @deprecated use `faceColor` */
+  fill?: string;
+  /** @deprecated unused — kept for backwards compatibility */
   showConstruction?: boolean;
 };
 
 /**
- * AYNI brand mark — hoja-escudo de café con la letra "A"
- * formada por la vena central y dos venas laterales (negative space).
+ * AYNI brand mark — hoja de café en forma de corazón con vena central
+ * y un rostro calmo (ojos curvos + sonrisa sutil).
+ *
+ * Por defecto dibuja el lockup completo (squircle de fondo + hoja +
+ * rostro). Pasa `background={null}` para usarlo "suelto" (solo la
+ * hoja con rostro, sin fondo), útil donde el contenedor ya aporta
+ * el fondo (headers, badges).
  */
 export function AyniMark({
   size = 64,
-  fill = "var(--color-primary)",
-  veinColor = "#F5F1E8",
-  showConstruction = false,
+  background = "var(--color-primary)",
+  faceColor,
+  featureColor = "var(--color-primary)",
+  veinColor = "var(--color-secondary)",
+  fill,
 }: AyniMarkProps) {
+  const resolvedFaceColor = faceColor ?? fill ?? "#FFFFFF";
   return (
     <svg
-      viewBox="0 0 120 140"
+      viewBox="0 0 200 200"
       width={size}
       height={size}
       aria-label="AYNI"
       role="img"
     >
-      {showConstruction && (
-        <g stroke="currentColor" strokeWidth="0.5" opacity="0.3" fill="none">
-          <circle cx="60" cy="70" r="60" />
-          <line x1="60" y1="0" x2="60" y2="140" />
-          <line x1="0" y1="70" x2="120" y2="70" />
-          <line x1="36" y1="100" x2="60" y2="38" />
-          <line x1="84" y1="100" x2="60" y2="38" />
-        </g>
+      {background && (
+        <rect x="0" y="0" width="200" height="200" rx="44" fill={background} />
       )}
 
-      {/* Leaf-shield silhouette */}
+      {/* Heart-shaped leaf: two rounded lobes meeting in a top notch,
+          tapering to a drip-tip point at the bottom. */}
       <path
-        d="M60 6 C92 6, 112 30, 112 70 L60 134 L8 70 C8 30, 28 6, 60 6 Z"
-        fill={fill}
+        d="M100 46 C82 14, 30 18, 30 70 C30 112, 70 142, 100 178 C130 142, 170 112, 170 70 C170 18, 118 14, 100 46 Z"
+        fill={resolvedFaceColor}
       />
 
-      {/* Negative-space "A" formed by leaf veins */}
+      {/* Center vein */}
+      <line
+        x1="100"
+        y1="56"
+        x2="100"
+        y2="160"
+        stroke={veinColor}
+        strokeWidth="3.5"
+        strokeLinecap="round"
+      />
+
+      {/* Calm crescent eyes + subtle smile */}
       <g
         fill="none"
-        stroke={veinColor}
-        strokeWidth="8"
-        strokeLinejoin="round"
+        stroke={featureColor}
+        strokeWidth="4.5"
         strokeLinecap="round"
       >
-        <line x1="36" y1="100" x2="60" y2="38" />
-        <line x1="84" y1="100" x2="60" y2="38" />
-        <line x1="46" y1="74" x2="74" y2="74" />
+        <path d="M70 102 Q78 92 86 102" />
+        <path d="M114 102 Q122 92 130 102" />
+        <path d="M84 122 Q100 134 116 122" />
       </g>
     </svg>
   );

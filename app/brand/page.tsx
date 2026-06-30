@@ -87,7 +87,7 @@ function LogoCoverPanel() {
       className="aspect-[4/3]"
     >
       <div className="flex-1 flex flex-col items-center justify-center text-center">
-        <AyniMark size={140} fill="#053D1F" veinColor={CREAM} />
+        <AyniMark size={140} background={null} fill="#053D1F" veinColor={CREAM} />
         <p
           className="mt-6 text-black-2 font-bold tracking-tight"
           style={{ fontSize: 56, lineHeight: "0.95" }}
@@ -115,6 +115,7 @@ function ConstructionPanel() {
           <div className="text-primary">
             <AyniMark
               size={150}
+              background={null}
               fill="currentColor"
               veinColor={FOREST_2}
               showConstruction
@@ -270,7 +271,7 @@ function DigitalApplicationPanel() {
           <div className="flex">
             <div className="w-16 bg-white border-r border-gray-5 p-2 flex flex-col gap-2">
               <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-                <AyniMark size={18} fill="#fff" veinColor="#04A033" />
+                <AyniMark size={18} background={null} fill="#fff" veinColor="#04A033" />
               </div>
               <div className="h-1.5 w-10 rounded-full bg-secondary" />
               <div className="h-1.5 w-8 rounded-full bg-gray-5" />
@@ -352,7 +353,7 @@ function PhysicalApplicationPanel() {
             </text>
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
-            <AyniMark size={72} fill="#053D1F" veinColor={CREAM_2} />
+            <AyniMark size={72} background={null} fill="#053D1F" veinColor={CREAM_2} />
           </div>
         </div>
       </div>
