@@ -10,6 +10,11 @@ import {
 } from "@/components/ui/shortcuts-overlay";
 import { TopProgressBar } from "@/components/ui/top-progress-bar";
 import {
+  CreateUserModal,
+  EditUserModal,
+  ViewUserModal,
+} from "@/components/users/user-modals";
+import {
   ROLE_TABS,
   type RoleFilter,
   UsersFilterBar,
@@ -34,6 +39,9 @@ export default function UsersPage() {
   const [search, setSearch] = useState("");
   const [role, setRole] = useState<RoleFilter>("ALL");
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [editUser, setEditUser] = useState<User | null>(null);
+  const [viewUser, setViewUser] = useState<User | null>(null);
 
   const { data, isLoading, isFetching, isError, refetch } = useUsers({
     page,
@@ -74,7 +82,12 @@ export default function UsersPage() {
               ),
           });
           break;
-        // "view" / "edit": requieren UI de detalle/edición (pendiente).
+        case "view":
+          setViewUser(user);
+          break;
+        case "edit":
+          setEditUser(user);
+          break;
         default:
           break;
       }
@@ -163,6 +176,7 @@ export default function UsersPage() {
             </button>
             <button
               type="button"
+              onClick={() => setCreateOpen(true)}
               className="press focus-ring h-11 px-5 rounded-full bg-primary text-white font-bold text-base hover:opacity-85 transition-opacity inline-flex items-center gap-2"
             >
               <UserPlus size={18} strokeWidth={2.25} />
@@ -220,6 +234,14 @@ export default function UsersPage() {
         onClose={() => setShortcutsOpen(false)}
         groups={shortcutGroups}
       />
+
+      {createOpen && <CreateUserModal onClose={() => setCreateOpen(false)} />}
+      {editUser && (
+        <EditUserModal user={editUser} onClose={() => setEditUser(null)} />
+      )}
+      {viewUser && (
+        <ViewUserModal user={viewUser} onClose={() => setViewUser(null)} />
+      )}
     </div>
   );
 }

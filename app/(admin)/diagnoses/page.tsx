@@ -2,10 +2,13 @@
 
 import {
   Download,
+  Image as ImageIcon,
+  ImageOff,
   List,
   Map as MapIcon,
   MapPin,
   Search,
+  X,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { PageHeader } from "@/components/admin/page-header";
@@ -15,6 +18,7 @@ import {
   PEST_OPTIONS,
 } from "@/lib/api/diagnoses";
 import { useDiagnoses, useZoneStats } from "@/lib/hooks/use-diagnoses";
+import { useDiagnosisDetail } from "@/lib/hooks/use-diagnosis-detail";
 import { t } from "@/lib/i18n/es";
 
 function statusBadge(status: AdminDiagnosis["status"]) {
@@ -34,6 +38,7 @@ export default function DiagnosesPage() {
   const [viewMode, setViewMode] = useState<"list" | "map">("list");
   const [searchTerm, setSearchTerm] = useState("");
   const [pest, setPest] = useState("ALL");
+  const [preview, setPreview] = useState<AdminDiagnosis | null>(null);
 
   const { data, isLoading, isError } = useDiagnoses({ pest, page: 0, size: 50 });
   const { data: zones, isLoading: zonesLoading } = useZoneStats();
@@ -132,24 +137,25 @@ export default function DiagnosesPage() {
                   <th className="py-s2 px-s3">Ubicación</th>
                   <th className="py-s2 px-s3">Fecha</th>
                   <th className="py-s2 px-s3">Estado</th>
+                  <th className="py-s2 px-s3 text-right">Imagen</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-5 text-black-2">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={6} className="py-s3 px-s3 text-center text-gray-3">
+                    <td colSpan={7} className="py-s3 px-s3 text-center text-gray-3">
                       Cargando…
                     </td>
                   </tr>
                 ) : isError ? (
                   <tr>
-                    <td colSpan={6} className="py-s3 px-s3 text-center text-error">
+                    <td colSpan={7} className="py-s3 px-s3 text-center text-error">
                       No se pudo cargar el historial.
                     </td>
                   </tr>
                 ) : rows.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-s3 px-s3 text-center text-gray-3">
+                    <td colSpan={7} className="py-s3 px-s3 text-center text-gray-3">
                       No hay diagnósticos para los filtros seleccionados.
                     </td>
                   </tr>
@@ -194,6 +200,15 @@ export default function DiagnosesPage() {
                           <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold border ${badge.cls}`}>
                             {badge.label}
                           </span>
+                        </td>
+                        <td className="py-s2 px-s3 text-right">
+                          <button
+                            type="button"
+                            onClick={() => setPreview(d)}
+                            className="press focus-ring h-9 px-3 rounded-full border border-gray-5 text-gray-1 hover:bg-gray-5 text-xs font-bold inline-flex items-center gap-s1 transition-colors"
+                          >
+                            <ImageIcon size={14} /> Ver
+                          </button>
                         </td>
                       </tr>
                     );
@@ -241,6 +256,86 @@ export default function DiagnosesPage() {
           )}
         </div>
       )}
+
+      {preview && (
+        <DiagnosisImageModal diagnosis={preview} onClose={() => setPreview(null)} />
+      )}
+    </div>
+  );
+}
+
+function DiagnosisImageModal({
+  diagnosis,
+  onClose,
+}: {
+  diagnosis: AdminDiagnosis;
+  onClose: () => void;
+}) {
+  const { data, isLoading, isError } = useDiagnosisDetail(diagnosis.id);
+
+  return (
+    // biome-ignore lint/a11y/useKeyWithClickEvents: overlay de cierre; el contenido detiene la propagación
+    <div
+      className="fixed inset-0 z-50 bg-black-2/50 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-2xl border border-gray-5 w-full max-w-2xl overflow-hidden flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-s3 py-s2 border-b border-gray-5">
+          <div className="flex flex-col min-w-0">
+            <span className="text-base font-bold text-black-2 truncate">{diagnosis.pestName}</span>
+            <span className="text-xs text-gray-3 italic truncate">{diagnosis.scientificName}</span>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Cerrar"
+            className="press h-9 w-9 rounded-full hover:bg-gray-5 flex items-center justify-center text-gray-3 shrink-0"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="h-[420px] bg-black-3 flex items-center justify-center">
+          {isLoading ? (
+            <span className="text-white/60 text-sm">Cargando imagen…</span>
+          ) : isError ? (
+            <span className="text-error text-sm">No se pudo cargar el diagnóstico.</span>
+          ) : data?.imageUrl ? (
+            // biome-ignore lint/performance/noImgElement: imagen servida con SAS desde Azure Blob, fuera del dominio de Next/Image
+            <img
+              src={data.imageUrl}
+              alt={`Diagnóstico ${diagnosis.pestName}`}
+              className="h-full w-full object-contain"
+            />
+          ) : (
+            <div className="flex flex-col items-center gap-s1 text-white/50">
+              <ImageOff size={40} />
+              <span className="text-sm">Imagen no disponible</span>
+              <span className="text-xs text-white/35">
+                (diagnóstico sin imagen en Azure — p. ej. capturas offline)
+              </span>
+            </div>
+          )}
+        </div>
+
+        <div className="grid grid-cols-3 gap-s2 px-s3 py-s2 border-t border-gray-5">
+          <Meta label="Caficultor" value={diagnosis.farmerLabel} />
+          <Meta label="Confianza" value={pct(diagnosis.confidence)} />
+          <Meta label="Severidad" value={pct(diagnosis.severity)} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Meta({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex flex-col">
+      <span className="text-xs text-gray-3 font-normal uppercase tracking-wider">{label}</span>
+      <span className="text-sm font-bold text-black-2 truncate">{value}</span>
     </div>
   );
 }

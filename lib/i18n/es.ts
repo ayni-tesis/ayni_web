@@ -83,6 +83,39 @@ export const t = {
       activate: "Reactivar cuenta",
       delete: "Eliminar cuenta",
     },
+    form: {
+      createTitle: "Crear usuario",
+      createSubtitle: "Registra un nuevo usuario y asígnale un rol.",
+      editTitle: "Editar usuario",
+      editSubtitle: "Actualiza el rol o el estado de la cuenta.",
+      viewTitle: "Perfil del usuario",
+      fullName: "Nombre completo",
+      fullNamePlaceholder: "Ej. María Quispe",
+      email: "Correo electrónico",
+      emailPlaceholder: "usuario@ayni.pe",
+      emailHint: "Se usará para iniciar sesión.",
+      password: "Contraseña",
+      passwordPlaceholder: "Mínimo 8 caracteres",
+      passwordHint:
+        "Compártela de forma segura; el usuario podrá cambiarla luego.",
+      role: "Rol",
+      status: "Estado",
+      submitCreate: "Crear usuario",
+      submitEdit: "Guardar cambios",
+      creating: "Creando…",
+      saving: "Guardando…",
+      required: "Este campo es obligatorio.",
+      invalidEmail: "Ingresa un correo válido.",
+      passwordTooShort: "La contraseña debe tener al menos 8 caracteres.",
+      createError:
+        "No se pudo crear el usuario. Verifica los datos e inténtalo de nuevo.",
+      updateError: "No se pudieron guardar los cambios. Inténtalo de nuevo.",
+    },
+    profile: {
+      community: "Comunidad",
+      lastActivity: "Última actividad",
+      noCommunity: "Sin comunidad registrada",
+    },
   },
 
   roles: {
@@ -201,9 +234,11 @@ export const t = {
     description:
       "Estado operativo de la arquitectura de dos etapas para localización de hojas y clasificación de plagas.",
     stage1Title: "Etapa 1: Localización y Bounding Boxes",
-    stage1Desc: "Modelo YOLOv8 para recortar la hoja de café eliminando ruido de fondo.",
+    stage1Desc:
+      "Modelo YOLOv8 para recortar la hoja de café eliminando ruido de fondo.",
     stage2Title: "Etapa 2: Clasificación de Plaga y Gravedad",
-    stage2Desc: "Modelo SmallPavicNet-MC / EfficientNet-B0 para inferir la plaga y estimar daño.",
+    stage2Desc:
+      "Modelo SmallPavicNet-MC / EfficientNet-B0 para inferir la plaga y estimar daño.",
     metrics: {
       map: "mAP@50",
       f1: "F1-Score",
