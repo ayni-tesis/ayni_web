@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { AyniMark } from "@/components/brand/ayni-mark";
 import { authService } from "@/lib/api/auth";
 import type { ApiError } from "@/lib/api/types";
 import { setSession } from "@/lib/auth/session";
@@ -51,8 +52,8 @@ export default function LoginPage() {
     <main className="flex min-h-screen items-center justify-center bg-gray-5 p-4">
       <div className="w-full max-w-md rounded-3xl bg-white p-8 shadow-sm">
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-xl font-bold text-white">
-            A
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary">
+            <AyniMark size={32} background={null} fill="#fff" veinColor="#04A033" />
           </div>
           <h1 className="text-2xl font-bold text-black-2">AYNI Admin</h1>
           <p className="mt-1 text-sm text-gray-3">

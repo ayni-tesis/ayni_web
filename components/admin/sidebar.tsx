@@ -10,11 +10,11 @@ import {
   ClipboardCheck,
   Home,
   Network,
-  Shield,
   Users,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { AyniMark } from "@/components/brand/ayni-mark";
 import { t } from "@/lib/i18n/es";
 import { cn } from "@/lib/utils";
 
@@ -81,7 +81,7 @@ export function Sidebar() {
     <aside className="w-64 shrink-0 bg-white border-r border-gray-5 flex flex-col gap-6 py-5 overflow-y-auto">
       <div className="flex items-center gap-3 px-5">
         <div className="h-12 w-12 rounded-full bg-primary flex items-center justify-center shrink-0">
-          <Shield size={22} className="text-white" strokeWidth={2.25} />
+          <AyniMark size={28} background={null} fill="#fff" veinColor="#04A033" />
         </div>
         <div className="min-w-0">
           <h5 className="text-h5 font-bold text-black-2 leading-none">AYNI</h5>
