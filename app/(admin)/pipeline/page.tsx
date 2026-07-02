@@ -11,6 +11,8 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { PageHeader } from "@/components/admin/page-header";
+import { ErrorState } from "@/components/ui/error-state";
+import { PanelSkeleton } from "@/components/ui/panel-skeleton";
 import type { PipelineStage } from "@/lib/api/pipeline";
 import { usePipelineModels } from "@/lib/hooks/use-pipeline";
 import { t } from "@/lib/i18n/es";
@@ -35,17 +37,17 @@ function num(params: Record<string, unknown>, key: string): string {
 }
 
 export default function PipelinePage() {
-  const { data, isLoading, isError } = usePipelineModels();
+  const { data, isLoading, isError, refetch, isFetching } = usePipelineModels();
   const stages = data?.stages ?? [];
 
   return (
     <div className="flex flex-col gap-s3">
       <PageHeader title={t.pipelinePage.title} description={t.pipelinePage.description} />
 
-      <div className="bg-secondary/40 border border-primary/20 text-gray-1 p-s2 rounded-xl flex items-start gap-s2">
-        <Info size={18} className="shrink-0 mt-0.5 text-primary" />
+      <div className="bg-cream-2/70 border border-gray-5 text-gray-1 p-s2 rounded-xl flex items-start gap-s2">
+        <Info size={18} className="shrink-0 mt-0.5 text-gray-2" />
         <div className="flex flex-col gap-s1 text-sm">
-          <span className="font-bold text-primary">Modelos en vivo · historial de referencia</span>
+          <span className="font-bold text-black-2">Modelos en vivo · historial de referencia</span>
           <span className="leading-relaxed text-gray-2">
             Los modelos cargados (abajo) se leen en tiempo real del{" "}
             <code>ml-model-service</code>. El historial de versiones es ilustrativo
@@ -63,7 +65,7 @@ export default function PipelinePage() {
           <DiagramStep icon={<Layers size={24} />} title="1. YOLOv8 (Localización)" desc="Detecta el contorno de la hoja y extrae el Bounding Box omitiendo el fondo." tone="primary" />
           <ArrowRight className="hidden lg:block text-gray-4" size={20} />
           <div className="flex flex-col items-center text-center max-w-[180px] z-10">
-            <div className="h-14 w-14 rounded-xl bg-white border border-dashed border-gray-4 flex items-center justify-center text-gray-3 text-[10px] font-bold">RECORTADA</div>
+            <div className="h-14 w-14 rounded-xl bg-white border border-dashed border-gray-4 flex items-center justify-center text-gray-3 text-2xs font-bold">{t.pipelinePage.truncatedLabel}</div>
             <span className="text-sm font-bold text-black-2 mt-s2">Segmento de Hoja</span>
             <span className="text-xs text-gray-3 font-normal mt-s1 leading-normal">Imagen normalizada aislada de hojas circundantes.</span>
           </div>
@@ -76,10 +78,16 @@ export default function PipelinePage() {
 
       {/* Modelos cargados (datos reales) */}
       {isLoading ? (
-        <div className="bg-white rounded-2xl border border-gray-5 p-12 text-center text-gray-3">Cargando modelos…</div>
+        <div className="bg-white rounded-2xl border border-gray-5 p-s3">
+          <PanelSkeleton rows={2} />
+        </div>
       ) : isError ? (
-        <div className="bg-white rounded-2xl border border-gray-5 p-12 text-center text-error">
-          El servicio de modelos ML no está disponible.
+        <div className="bg-white rounded-2xl border border-gray-5">
+          <ErrorState
+            title={t.pipelinePage.error}
+            onRetry={() => refetch()}
+            retrying={isFetching}
+          />
         </div>
       ) : (
         <div className="grid gap-s3 grid-cols-1 md:grid-cols-2">
@@ -120,11 +128,11 @@ export default function PipelinePage() {
                   <td className="py-s2 px-s3 font-bold">{m.version}</td>
                   <td className="py-s2 px-s3 font-medium">{m.stage}</td>
                   <td className="py-s2 px-s3 text-sm text-gray-1">{m.model}</td>
-                  <td className="py-s2 px-s3 text-sm font-bold text-primary">{m.accuracy}</td>
+                  <td className="py-s2 px-s3 text-sm font-bold text-black-2 tabular-nums">{m.accuracy}</td>
                   <td className="py-s2 px-s3 text-sm text-gray-2 font-mono">{m.loss}</td>
                   <td className="py-s2 px-s3 text-sm text-gray-3">{m.date}</td>
                   <td className="py-s2 px-s3">
-                    <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold border ${
+                    <span className={`inline-flex px-2.5 py-1 rounded-full text-2xs font-bold border ${
                       m.status === "PRODUCTION" ? "bg-success/10 text-success border-success/20"
                         : m.status === "ROLLBACKED" ? "bg-error/10 text-error border-error/20"
                         : "bg-gray-5 text-gray-3 border-gray-4/30"
@@ -182,7 +190,7 @@ function ModelCard({ stage }: { stage: PipelineStage }) {
             <p className="text-xs text-gray-3 font-semibold mt-s1 font-mono">{stage.file}</p>
           </div>
         </div>
-        <span className={`px-2.5 py-1 rounded text-xs font-bold border flex items-center gap-s1 ${
+        <span className={`px-2.5 py-1 rounded-full text-2xs font-bold border flex items-center gap-s1 ${
           stage.loaded ? "bg-success/10 text-success border-success/20" : "bg-error/10 text-error border-error/20"
         }`}>
           {stage.loaded ? "Cargado" : "No cargado"}
@@ -211,7 +219,7 @@ function ModelCard({ stage }: { stage: PipelineStage }) {
           <span className="text-xs text-gray-3 font-semibold uppercase tracking-wider">Etiquetas del clasificador</span>
           <div className="flex flex-wrap gap-s1">
             {labels.map((l) => (
-              <span key={l} className="px-2 py-0.5 rounded bg-gray-5 text-gray-1 text-[11px] font-bold border border-gray-4/30">{l}</span>
+              <span key={l} className="px-2.5 py-1 rounded-full bg-gray-5 text-gray-1 text-2xs font-bold border border-gray-4/30">{l}</span>
             ))}
           </div>
         </div>

@@ -4,14 +4,22 @@ import {
   Download,
   Image as ImageIcon,
   ImageOff,
+  Keyboard,
   List,
   Map as MapIcon,
   MapPin,
   Search,
   X,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { PageHeader } from "@/components/admin/page-header";
+import {
+  type ShortcutGroup,
+  ShortcutsOverlay,
+} from "@/components/ui/shortcuts-overlay";
+import { TableErrorState } from "@/components/ui/table-error-state";
+import { TableSkeletonRows } from "@/components/ui/table-skeleton";
 import {
   type AdminDiagnosis,
   diagnosesService,
@@ -19,13 +27,24 @@ import {
 } from "@/lib/api/diagnoses";
 import { useDiagnoses, useZoneStats } from "@/lib/hooks/use-diagnoses";
 import { useDiagnosisDetail } from "@/lib/hooks/use-diagnosis-detail";
+import { useHotkeys } from "@/lib/hooks/use-hotkeys";
+import { toast } from "@/lib/hooks/use-toast";
 import { t } from "@/lib/i18n/es";
 
 function statusBadge(status: AdminDiagnosis["status"]) {
   const map = {
-    CONFIRMED: { label: "Validado", cls: "bg-success/10 text-success border-success/20" },
-    REJECTED: { label: "Rechazado", cls: "bg-error/10 text-error border-error/20" },
-    PENDING: { label: "Pendiente", cls: "bg-warning/10 text-warning border-warning/20" },
+    CONFIRMED: {
+      label: "Validado",
+      cls: "bg-success/10 text-success border-success/20",
+    },
+    REJECTED: {
+      label: "Rechazado",
+      cls: "bg-error/10 text-error border-error/20",
+    },
+    PENDING: {
+      label: "Pendiente",
+      cls: "bg-warning/10 text-warning-ink border-warning/20",
+    },
   } as const;
   return map[status] ?? map.PENDING;
 }
@@ -35,12 +54,18 @@ function pct(v: number | null): string {
 }
 
 export default function DiagnosesPage() {
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [viewMode, setViewMode] = useState<"list" | "map">("list");
   const [searchTerm, setSearchTerm] = useState("");
   const [pest, setPest] = useState("ALL");
   const [preview, setPreview] = useState<AdminDiagnosis | null>(null);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
 
-  const { data, isLoading, isError } = useDiagnoses({ pest, page: 0, size: 50 });
+  const { data, isLoading, isError, isFetching, refetch } = useDiagnoses({
+    pest,
+    page: 0,
+    size: 50,
+  });
   const { data: zones, isLoading: zonesLoading } = useZoneStats();
 
   const rows = useMemo(() => {
@@ -58,9 +83,36 @@ export default function DiagnosesPage() {
     try {
       await diagnosesService.exportCsv({ pest });
     } catch {
-      window.alert("No se pudo exportar el historial.");
+      toast({ title: t.diagnosesPage.toasts.exportError, tone: "error" });
     }
   }
+
+  useHotkeys(
+    useMemo(
+      () => [
+        {
+          key: "/",
+          handler: (e) => {
+            e.preventDefault();
+            searchInputRef.current?.focus();
+            searchInputRef.current?.select();
+          },
+        },
+        { key: "?", handler: () => setShortcutsOpen(true) },
+      ],
+      [],
+    ),
+  );
+
+  const shortcutGroups: ShortcutGroup[] = [
+    {
+      title: t.diagnosesPage.title,
+      items: [
+        { keys: ["/"], label: t.shortcuts.focusSearch },
+        { keys: ["?"], label: t.shortcuts.showHelp },
+      ],
+    },
+  ];
 
   return (
     <div className="flex flex-col gap-s3">
@@ -69,6 +121,14 @@ export default function DiagnosesPage() {
         description={t.diagnosesPage.description}
         actions={
           <div className="flex items-center gap-s2">
+            <button
+              type="button"
+              onClick={() => setShortcutsOpen(true)}
+              aria-label={t.shortcuts.showHelp}
+              className="press focus-ring h-11 w-11 rounded-full border border-gray-5 text-gray-1 hover:bg-gray-5 inline-flex items-center justify-center transition-colors"
+            >
+              <Keyboard size={18} />
+            </button>
             <div className="bg-white rounded-full border border-gray-5 p-s1 flex">
               <button
                 type="button"
@@ -76,7 +136,7 @@ export default function DiagnosesPage() {
                 className={`press h-9 px-s2 rounded-full text-sm font-bold flex items-center gap-s1 transition-colors ${viewMode === "list" ? "bg-secondary text-primary" : "text-gray-2 hover:bg-gray-5"}`}
               >
                 <List size={16} />
-                Lista
+                {t.diagnosesPage.tabList}
               </button>
               <button
                 type="button"
@@ -84,7 +144,7 @@ export default function DiagnosesPage() {
                 className={`press h-9 px-s2 rounded-full text-sm font-bold flex items-center gap-s1 transition-colors ${viewMode === "map" ? "bg-secondary text-primary" : "text-gray-2 hover:bg-gray-5"}`}
               >
                 <MapIcon size={16} />
-                Mapa
+                {t.diagnosesPage.tabZone}
               </button>
             </div>
             <button
@@ -99,64 +159,80 @@ export default function DiagnosesPage() {
         }
       />
 
-      <div className="bg-white rounded-2xl border border-gray-5 p-s2 flex flex-col md:flex-row gap-s2 items-center justify-between">
-        <div className="relative w-full md:w-80">
-          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-3" />
-          <input
-            type="text"
-            placeholder={t.diagnosesPage.searchPlaceholder}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full h-11 pl-11 pr-4 bg-gray-5 rounded-full text-[#1D1D1D] font-bold text-base placeholder:text-[#828282] placeholder:font-normal border-none outline-none focus:ring-2 focus:ring-primary transition-shadow"
-          />
-        </div>
-        <div className="flex flex-wrap items-center gap-s2 w-full md:w-auto justify-end">
-          <select
-            value={pest}
-            onChange={(e) => setPest(e.target.value)}
-            className="press h-11 px-s2 rounded-full border border-gray-5 bg-white text-gray-2 text-sm font-bold focus:ring-2 focus:ring-primary outline-none"
-          >
-            {PEST_OPTIONS.map((p) => (
-              <option key={p.value} value={p.value}>
-                {p.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
       {viewMode === "list" ? (
         <div className="bg-white rounded-2xl border border-gray-5 overflow-hidden">
+          <div className="p-s2 flex flex-col md:flex-row gap-s2 items-center justify-between border-b border-gray-5">
+            <div className="relative w-full md:w-80">
+              <Search
+                size={18}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-3"
+              />
+              <input
+                ref={searchInputRef}
+                type="text"
+                placeholder={t.diagnosesPage.searchPlaceholder}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full h-11 pl-11 pr-4 bg-gray-5 rounded-full text-black-2 font-bold text-base placeholder:text-gray-2 placeholder:font-normal border-none outline-none focus:ring-2 focus:ring-primary transition-shadow"
+              />
+            </div>
+            <div className="flex flex-wrap items-center gap-s2 w-full md:w-auto justify-end">
+              <select
+                value={pest}
+                onChange={(e) => setPest(e.target.value)}
+                className="press h-11 px-s2 rounded-full border border-gray-5 bg-white text-gray-2 text-sm font-bold focus:ring-2 focus:ring-primary outline-none"
+              >
+                {PEST_OPTIONS.map((p) => (
+                  <option key={p.value} value={p.value}>
+                    {p.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-left">
               <thead>
-                <tr className="bg-gray-5/50 border-b border-gray-5 text-gray-2 text-xs font-bold uppercase tracking-wider">
-                  <th className="py-s2 px-s3">Diagnóstico</th>
-                  <th className="py-s2 px-s3">Caficultor</th>
-                  <th className="py-s2 px-s3">Severidad</th>
-                  <th className="py-s2 px-s3">Ubicación</th>
-                  <th className="py-s2 px-s3">Fecha</th>
-                  <th className="py-s2 px-s3">Estado</th>
-                  <th className="py-s2 px-s3 text-right">Imagen</th>
+                <tr className="bg-gray-5/50 border-b border-gray-5 text-gray-2 text-2xs font-bold uppercase tracking-wider">
+                  <th scope="col" className="py-s2 px-s3">
+                    Diagnóstico
+                  </th>
+                  <th scope="col" className="py-s2 px-s3">
+                    Caficultor
+                  </th>
+                  <th scope="col" className="py-s2 px-s3">
+                    Severidad
+                  </th>
+                  <th scope="col" className="py-s2 px-s3">
+                    Ubicación
+                  </th>
+                  <th scope="col" className="py-s2 px-s3">
+                    Fecha
+                  </th>
+                  <th scope="col" className="py-s2 px-s3">
+                    Estado
+                  </th>
+                  <th scope="col" className="py-s2 px-s3 text-right">
+                    Imagen
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-5 text-black-2">
                 {isLoading ? (
-                  <tr>
-                    <td colSpan={7} className="py-s3 px-s3 text-center text-gray-3">
-                      Cargando…
-                    </td>
-                  </tr>
+                  <TableSkeletonRows rows={10} cols={7} />
                 ) : isError ? (
-                  <tr>
-                    <td colSpan={7} className="py-s3 px-s3 text-center text-error">
-                      No se pudo cargar el historial.
-                    </td>
-                  </tr>
+                  <TableErrorState
+                    colSpan={7}
+                    onRetry={() => refetch()}
+                    retrying={isFetching}
+                  />
                 ) : rows.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-s3 px-s3 text-center text-gray-3">
-                      No hay diagnósticos para los filtros seleccionados.
+                    <td
+                      colSpan={7}
+                      className="py-s3 px-s3 text-center text-gray-3"
+                    >
+                      {t.diagnosesPage.emptyHistory}
                     </td>
                   </tr>
                 ) : (
@@ -164,7 +240,10 @@ export default function DiagnosesPage() {
                     const badge = statusBadge(d.status);
                     const sev = d.severity ?? 0;
                     return (
-                      <tr key={d.id} className="hover:bg-gray-5/30 transition-colors">
+                      <tr
+                        key={d.id}
+                        className="hover:bg-gray-5/30 transition-colors"
+                      >
                         <td className="py-s2 px-s3">
                           <div className="flex flex-col">
                             <span className="font-bold">{d.pestName}</span>
@@ -184,20 +263,28 @@ export default function DiagnosesPage() {
                                 style={{ width: `${sev * 100}%` }}
                               />
                             </div>
-                            <span className="text-xs font-bold text-gray-1">{pct(d.severity)}</span>
+                            <span className="text-xs font-bold text-gray-1">
+                              {pct(d.severity)}
+                            </span>
                           </div>
                         </td>
                         <td className="py-s2 px-s3 text-sm text-gray-2 font-normal">
                           <span className="flex items-center gap-s1">
                             <MapPin size={14} className="text-gray-3" />
-                            {d.latitude && d.longitude ? `${d.latitude}, ${d.longitude}` : "—"}
+                            {d.latitude && d.longitude
+                              ? `${d.latitude}, ${d.longitude}`
+                              : "—"}
                           </span>
                         </td>
                         <td className="py-s2 px-s3 text-sm text-gray-3 font-normal">
-                          {d.capturedAt ? new Date(d.capturedAt).toLocaleString("es-PE") : "—"}
+                          {d.capturedAt
+                            ? new Date(d.capturedAt).toLocaleString("es-PE")
+                            : "—"}
                         </td>
                         <td className="py-s2 px-s3">
-                          <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold border ${badge.cls}`}>
+                          <span
+                            className={`inline-flex px-2.5 py-1 rounded-full text-2xs font-bold border ${badge.cls}`}
+                          >
                             {badge.label}
                           </span>
                         </td>
@@ -219,25 +306,36 @@ export default function DiagnosesPage() {
           </div>
         </div>
       ) : (
-        /* Vista mapa: agregación real por zona (lat/lng redondeada) */
+        /* Vista por zona: agregación real por zona (lat/lng redondeada) */
         <div className="bg-white rounded-2xl border border-gray-5 p-s3 flex flex-col gap-s2">
           <div className="border-b border-gray-5 pb-s2">
-            <h6 className="text-h6 font-bold text-black-2">Mapa de Calor Fitosanitario</h6>
+            <h6 className="text-h6 font-bold text-black-2">
+              Mapa de Calor Fitosanitario
+            </h6>
             <p className="text-sm text-gray-3 font-normal mt-s1">
-              Casos por zona geográfica (coordenadas agrupadas), desde el read-model real.
+              Casos por zona geográfica (coordenadas agrupadas), desde el
+              read-model real.
             </p>
           </div>
           {zonesLoading ? (
             <p className="py-s2 text-sm text-gray-3">Cargando zonas…</p>
           ) : !zones || zones.length === 0 ? (
-            <p className="py-s2 text-sm text-gray-3">Sin datos geográficos todavía.</p>
+            <p className="py-s2 text-sm text-gray-3">
+              Sin datos geográficos todavía.
+            </p>
           ) : (
             <table className="w-full text-left">
               <thead>
-                <tr className="text-gray-2 text-xs font-bold uppercase tracking-wider border-b border-gray-5">
-                  <th className="py-s2 px-s2">Zona (lat, lng)</th>
-                  <th className="py-s2 px-s2">Plaga</th>
-                  <th className="py-s2 px-s2 text-right">Casos</th>
+                <tr className="text-gray-2 text-2xs font-bold uppercase tracking-wider border-b border-gray-5">
+                  <th scope="col" className="py-s2 px-s2">
+                    Zona (lat, lng)
+                  </th>
+                  <th scope="col" className="py-s2 px-s2">
+                    Plaga
+                  </th>
+                  <th scope="col" className="py-s2 px-s2 text-right">
+                    Casos
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-5">
@@ -247,8 +345,12 @@ export default function DiagnosesPage() {
                       <MapPin size={14} className="text-gray-3" />
                       {z.latitude.toFixed(1)}, {z.longitude.toFixed(1)}
                     </td>
-                    <td className="py-s2 px-s2 text-sm text-gray-2">{z.pestType}</td>
-                    <td className="py-s2 px-s2 text-sm font-bold text-black-2 text-right">{z.count}</td>
+                    <td className="py-s2 px-s2 text-sm text-gray-2">
+                      {z.pestType}
+                    </td>
+                    <td className="py-s2 px-s2 text-sm font-bold text-black-2 text-right">
+                      {z.count}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -258,8 +360,17 @@ export default function DiagnosesPage() {
       )}
 
       {preview && (
-        <DiagnosisImageModal diagnosis={preview} onClose={() => setPreview(null)} />
+        <DiagnosisImageModal
+          diagnosis={preview}
+          onClose={() => setPreview(null)}
+        />
       )}
+
+      <ShortcutsOverlay
+        open={shortcutsOpen}
+        onClose={() => setShortcutsOpen(false)}
+        groups={shortcutGroups}
+      />
     </div>
   );
 }
@@ -273,36 +384,56 @@ function DiagnosisImageModal({
 }) {
   const { data, isLoading, isError } = useDiagnosisDetail(diagnosis.id);
 
-  return (
-    // biome-ignore lint/a11y/useKeyWithClickEvents: overlay de cierre; el contenido detiene la propagación
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, [onClose]);
+
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={diagnosis.pestName}
       className="fixed inset-0 z-50 bg-black-2/50 flex items-center justify-center p-4"
-      onClick={onClose}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") onClose();
+      }}
     >
-      <div
-        className="bg-white rounded-2xl border border-gray-5 w-full max-w-2xl overflow-hidden flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="bg-white rounded-2xl border border-gray-5 w-full max-w-2xl overflow-hidden flex flex-col">
         <div className="flex items-center justify-between px-s3 py-s2 border-b border-gray-5">
           <div className="flex flex-col min-w-0">
-            <span className="text-base font-bold text-black-2 truncate">{diagnosis.pestName}</span>
-            <span className="text-xs text-gray-3 italic truncate">{diagnosis.scientificName}</span>
+            <span className="text-base font-bold text-black-2 truncate">
+              {diagnosis.pestName}
+            </span>
+            <span className="text-xs text-gray-3 italic truncate">
+              {diagnosis.scientificName}
+            </span>
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Cerrar"
-            className="press h-9 w-9 rounded-full hover:bg-gray-5 flex items-center justify-center text-gray-3 shrink-0"
+            className="press focus-ring h-9 w-9 rounded-full hover:bg-gray-5 flex items-center justify-center text-gray-3 shrink-0"
           >
             <X size={18} />
           </button>
         </div>
 
-        <div className="h-[420px] bg-black-3 flex items-center justify-center">
+        <div className="h-[420px] bg-forest-deep flex items-center justify-center">
           {isLoading ? (
             <span className="text-white/60 text-sm">Cargando imagen…</span>
           ) : isError ? (
-            <span className="text-error text-sm">No se pudo cargar el diagnóstico.</span>
+            <span className="text-error text-sm">
+              No se pudo cargar el diagnóstico.
+            </span>
           ) : data?.imageUrl ? (
             // biome-ignore lint/performance/noImgElement: imagen servida con SAS desde Azure Blob, fuera del dominio de Next/Image
             <img
@@ -327,14 +458,17 @@ function DiagnosisImageModal({
           <Meta label="Severidad" value={pct(diagnosis.severity)} />
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
 function Meta({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col">
-      <span className="text-xs text-gray-3 font-normal uppercase tracking-wider">{label}</span>
+      <span className="text-2xs font-bold text-gray-3 uppercase tracking-wider">
+        {label}
+      </span>
       <span className="text-sm font-bold text-black-2 truncate">{value}</span>
     </div>
   );

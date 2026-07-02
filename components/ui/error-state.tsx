@@ -17,9 +17,9 @@ export function ErrorState({
   return (
     <div
       role="alert"
-      className="flex flex-col items-center justify-center text-center gap-3 px-6 py-12"
+      className="flex flex-col items-center justify-center text-center gap-s1 px-s3 py-s5"
     >
-      <div className="h-12 w-12 rounded-full bg-[#FFE5E5] text-error flex items-center justify-center">
+      <div className="h-12 w-12 rounded-full bg-error-soft text-error flex items-center justify-center">
         <AlertCircle size={22} />
       </div>
       <div>
@@ -31,7 +31,7 @@ export function ErrorState({
           type="button"
           onClick={onRetry}
           disabled={retrying}
-          className="press focus-ring h-10 px-4 mt-2 rounded-full bg-black-2 text-white text-sm font-bold inline-flex items-center gap-2 hover:opacity-85 disabled:opacity-50 transition-opacity"
+          className="press focus-ring h-10 px-4 mt-s1 rounded-full bg-black-2 text-white text-sm font-bold inline-flex items-center gap-s1 hover:opacity-85 disabled:opacity-50 transition-opacity"
         >
           <RotateCw
             size={16}

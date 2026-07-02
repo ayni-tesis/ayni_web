@@ -1,6 +1,6 @@
 "use client";
 
-import { ListFilter, Search, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { forwardRef } from "react";
 import type { UserRole } from "@/lib/api/types";
 import { t } from "@/lib/i18n/es";
@@ -30,9 +30,9 @@ export const UsersFilterBar = forwardRef<HTMLInputElement, UsersFilterBarProps>(
     const hasSearch = search.length > 0;
 
     return (
-      <div className="flex items-center gap-3 flex-wrap p-4">
+      <div className="flex items-center gap-s1 flex-wrap p-s2">
         <div className="flex-1 min-w-64">
-          <div className="flex items-center gap-2 h-11 bg-white border border-gray-5 rounded-xl px-3 focus-within:border-primary transition-colors">
+          <div className="flex items-center gap-2 h-11 bg-white border border-gray-5 rounded-full px-3 focus-within:border-primary transition-colors">
             <Search size={18} className="text-gray-3" aria-hidden />
             <input
               ref={ref}
@@ -41,7 +41,7 @@ export const UsersFilterBar = forwardRef<HTMLInputElement, UsersFilterBarProps>(
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder={t.users.searchPlaceholder}
               aria-label={t.users.searchPlaceholder}
-              className="flex-1 bg-transparent text-base text-black-2 placeholder:text-gray-3 outline-none"
+              className="flex-1 bg-transparent text-base text-black-2 placeholder:text-gray-2 outline-none"
             />
             {hasSearch && (
               <button
@@ -55,14 +55,6 @@ export const UsersFilterBar = forwardRef<HTMLInputElement, UsersFilterBarProps>(
             )}
           </div>
         </div>
-
-        <button
-          type="button"
-          className="press focus-ring h-11 px-4 inline-flex items-center gap-2 rounded-xl border border-gray-5 text-base text-gray-1 hover:bg-gray-5 transition-colors"
-        >
-          <ListFilter size={18} />
-          {t.users.filters}
-        </button>
 
         <div className="flex items-center gap-2">
           {ROLE_TABS.map((tab) => {

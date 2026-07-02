@@ -3,18 +3,20 @@ import { Header } from "@/components/admin/header";
 import { NotificationToaster } from "@/components/admin/notification-toaster";
 import { Sidebar } from "@/components/admin/sidebar";
 import { AuthGuard } from "@/components/admin/auth-guard";
+import { ToastPortal } from "@/components/ui/toast-portal";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
     <AuthGuard>
-      <div className="flex min-h-screen bg-gray-5">
+      <div className="flex min-h-screen bg-cream">
         <Sidebar />
         <div className="flex-1 flex flex-col min-w-0">
           <Header />
-          <main className="flex-1 p-4">{children}</main>
+          <main className="flex-1 p-s3">{children}</main>
         </div>
       </div>
       <NotificationToaster />
+      <ToastPortal />
     </AuthGuard>
   );
 }

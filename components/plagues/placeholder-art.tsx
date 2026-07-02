@@ -1,13 +1,13 @@
 /**
  * Placeholder visual cuando una plaga no tiene imagen subida todavía.
- * Hoja botánica minimalista en outline, sobre fondo neutro tintado al verde de marca.
+ * Hoja botánica minimalista en outline, sobre el cream de marca.
  * Mantiene la misma jerarquía visual que una foto real para que la grid no descose.
  */
 export function PlaguePlaceholderArt() {
   return (
     <div
       aria-hidden
-      className="absolute inset-0 bg-gradient-to-br from-[#F5F8F2] to-[#EAEFE5] flex items-center justify-center"
+      className="absolute inset-0 bg-gradient-to-br from-cream to-cream-2 flex items-center justify-center"
     >
       <svg
         viewBox="0 0 120 120"

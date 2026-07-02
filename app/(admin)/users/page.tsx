@@ -3,6 +3,7 @@
 import { Keyboard, UserPlus } from "lucide-react";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { PageHeader } from "@/components/admin/page-header";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import {
   type ShortcutGroup,
@@ -12,6 +13,7 @@ import { TopProgressBar } from "@/components/ui/top-progress-bar";
 import {
   CreateUserModal,
   EditUserModal,
+  TempPasswordModal,
   ViewUserModal,
 } from "@/components/users/user-modals";
 import {
@@ -23,6 +25,7 @@ import { UsersPagination } from "@/components/users/users-pagination";
 import { UsersTable } from "@/components/users/users-table";
 import type { User } from "@/lib/api/types";
 import { useHotkeys } from "@/lib/hooks/use-hotkeys";
+import { toast } from "@/lib/hooks/use-toast";
 import {
   useDeleteUser,
   useResetPassword,
@@ -42,6 +45,11 @@ export default function UsersPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [editUser, setEditUser] = useState<User | null>(null);
   const [viewUser, setViewUser] = useState<User | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
+  const [tempPwd, setTempPwd] = useState<{
+    name: string;
+    password: string;
+  } | null>(null);
 
   const { data, isLoading, isFetching, isError, refetch } = useUsers({
     page,
@@ -66,20 +74,16 @@ export default function UsersPage() {
           updateUser.mutate({ id: user.id, input: { status: "INACTIVE" } });
           break;
         case "delete":
-          if (
-            window.confirm(
-              `¿Eliminar la cuenta de ${user.fullName}? Esta acción no se puede deshacer.`,
-            )
-          ) {
-            deleteUser.mutate(user.id);
-          }
+          setDeleteTarget(user);
           break;
         case "reset-password":
           resetPassword.mutate(user.id, {
-            onSuccess: (res) =>
-              window.alert(
-                `Contraseña temporal para ${user.fullName}:\n\n${res.temporaryPassword}\n\nCompártela de forma segura; el usuario deberá cambiarla.`,
-              ),
+            onSuccess: (res) => {
+              setTempPwd({
+                name: user.fullName,
+                password: res.temporaryPassword,
+              });
+            },
           });
           break;
         case "view":
@@ -92,7 +96,7 @@ export default function UsersPage() {
           break;
       }
     },
-    [updateUser, deleteUser, resetPassword],
+    [updateUser, resetPassword],
   );
 
   const totalPages = data?.totalPages ?? 1;
@@ -234,6 +238,33 @@ export default function UsersPage() {
         onClose={() => setShortcutsOpen(false)}
         groups={shortcutGroups}
       />
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title={t.users.confirmDeleteTitle}
+        body={t.users.confirmDeleteBody(deleteTarget?.fullName ?? "")}
+        confirmLabel={t.users.rowActions.delete}
+        tone="danger"
+        onConfirm={() => {
+          if (!deleteTarget) return;
+          deleteUser.mutate(deleteTarget.id, {
+            onSuccess: () => {
+              setDeleteTarget(null);
+              toast({ title: t.users.toasts.deleted, tone: "success" });
+            },
+          });
+        }}
+        onCancel={() => setDeleteTarget(null)}
+        pending={deleteUser.isPending}
+      />
+
+      {tempPwd && (
+        <TempPasswordModal
+          name={tempPwd.name}
+          password={tempPwd.password}
+          onClose={() => setTempPwd(null)}
+        />
+      )}
 
       {createOpen && <CreateUserModal onClose={() => setCreateOpen(false)} />}
       {editUser && (

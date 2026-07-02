@@ -2,8 +2,8 @@ import { cn } from "@/lib/utils";
 
 const AVATAR_PALETTE = [
   { bg: "bg-secondary", text: "text-primary" },
-  { bg: "bg-[#FFE5E5]", text: "text-error" },
-  { bg: "bg-[#FFF4D6]", text: "text-warning" },
+  { bg: "bg-error-soft", text: "text-error" },
+  { bg: "bg-warning-soft", text: "text-warning-ink" },
   { bg: "bg-gray-5", text: "text-gray-1" },
 ] as const;
 

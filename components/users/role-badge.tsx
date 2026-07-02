@@ -7,6 +7,7 @@ type RoleStyle = {
   icon: LucideIcon;
   bg: string;
   text: string;
+  border: string;
 };
 
 const ROLE_STYLES: Record<UserRole, RoleStyle> = {
@@ -14,16 +15,19 @@ const ROLE_STYLES: Record<UserRole, RoleStyle> = {
     icon: Tractor,
     bg: "bg-secondary",
     text: "text-primary",
+    border: "border border-primary/20",
   },
   AGRONOMIST: {
     icon: FlaskConical,
-    bg: "bg-[#E8F1FF]",
-    text: "text-[#3B6FE0]",
+    bg: "bg-agronomist-soft",
+    text: "text-agronomist",
+    border: "border border-agronomist/20",
   },
   ADMIN: {
     icon: ShieldCheck,
     bg: "bg-black-2",
     text: "text-white",
+    border: "border border-white/15",
   },
 };
 
@@ -32,7 +36,7 @@ export function RoleBadge({ role }: { role: UserRole }) {
   const Icon = style.icon;
   return (
     <span
-      className={`inline-flex items-center gap-1.5 h-7 rounded-full px-3 text-sm font-bold ${style.bg} ${style.text}`}
+      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-2xs font-bold ${style.bg} ${style.text} ${style.border}`}
     >
       <Icon size={14} strokeWidth={2.25} />
       {ROLE_LABELS[role]}

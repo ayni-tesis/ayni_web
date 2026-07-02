@@ -60,9 +60,11 @@ export function PlagueCard({ plague, onEdit }: PlagueCardProps) {
           </div>
           <button
             type="button"
+            disabled
             onClick={() => onEdit?.(plague)}
-            aria-label={`${t.catalog.cardActions.edit} ${plague.commonName}`}
-            className="press focus-ring h-8 w-8 rounded-full text-gray-2 hover:text-primary hover:bg-secondary inline-flex items-center justify-center shrink-0 transition-colors"
+            title={t.catalog.cardActions.editNotAvailable}
+            aria-label={`${t.catalog.cardActions.edit} ${plague.commonName} (${t.catalog.cardActions.editNotAvailable})`}
+            className="focus-ring h-10 w-10 rounded-full text-gray-3 opacity-50 cursor-not-allowed inline-flex items-center justify-center shrink-0"
           >
             <Pencil size={14} />
           </button>

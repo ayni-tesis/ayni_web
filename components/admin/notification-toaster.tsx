@@ -52,7 +52,7 @@ export function NotificationToaster() {
           type="button"
           aria-label="Cerrar"
           onClick={() => setToast(null)}
-          className="press h-7 w-7 rounded-full hover:bg-gray-5 flex items-center justify-center text-gray-3 shrink-0"
+          className="press focus-ring h-9 w-9 rounded-full hover:bg-gray-5 flex items-center justify-center text-gray-3 shrink-0"
         >
           <X size={15} />
         </button>

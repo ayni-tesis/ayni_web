@@ -43,12 +43,12 @@ export function UsersTable({
     <div className="overflow-x-auto">
       <table className="w-full text-left">
         <thead>
-          <tr>
+          <tr className="bg-gray-5/50 border-b border-gray-5">
             {HEADERS.map((header) => (
               <th
                 key={header}
                 scope="col"
-                className="px-6 py-3 text-sm font-bold text-gray-2 uppercase tracking-wider"
+                className="py-s2 px-s3 text-2xs font-bold text-gray-2 uppercase tracking-wider"
               >
                 {header}
               </th>
@@ -62,11 +62,13 @@ export function UsersTable({
             ))
           ) : users.length === 0 ? (
             <tr>
-              <td
-                colSpan={HEADERS.length}
-                className="px-6 py-12 text-center text-gray-2"
-              >
-                {t.users.emptyState}
+              <td colSpan={HEADERS.length} className="px-s3 py-s5 text-center">
+                <p className="text-base font-bold text-black-2">
+                  {t.users.emptyState}
+                </p>
+                <p className="text-sm text-gray-2 mt-s1">
+                  {t.users.emptyStateBody}
+                </p>
               </td>
             </tr>
           ) : (
@@ -122,8 +124,8 @@ function UserRow({
   ];
 
   return (
-    <tr className="border-t border-gray-5 hover:bg-gray-5/40 transition-colors">
-      <td className="px-6 py-4">
+    <tr className="border-t border-gray-5 hover:bg-gray-5/30 transition-colors">
+      <td className="px-s3 py-s2">
         <div className="flex items-center gap-3">
           <Avatar fullName={user.fullName} src={user.avatarUrl} />
           <div className="min-w-0">
@@ -134,17 +136,17 @@ function UserRow({
           </div>
         </div>
       </td>
-      <td className="px-6 py-4">
+      <td className="px-s3 py-s2">
         <RoleBadge role={user.role} />
       </td>
-      <td className="px-6 py-4 text-base text-black-2">{user.community}</td>
-      <td className="px-6 py-4 text-base text-gray-1">
+      <td className="px-s3 py-s2 text-base text-black-2">{user.community}</td>
+      <td className="px-s3 py-s2 text-base text-gray-1">
         {formatRelativeTime(user.lastActivityAt)}
       </td>
-      <td className="px-6 py-4">
+      <td className="px-s3 py-s2">
         <StatusBadge status={user.status} />
       </td>
-      <td className="px-6 py-4">
+      <td className="px-s3 py-s2">
         <DropdownMenu
           ariaLabel={`${t.common.actions} para ${user.fullName}`}
           trigger={<MoreVertical size={18} />}
@@ -158,7 +160,7 @@ function UserRow({
 function SkeletonRow() {
   return (
     <tr className="border-t border-gray-5">
-      <td className="px-6 py-4">
+      <td className="px-s3 py-s2">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-full bg-gray-5 animate-pulse" />
           <div className="flex flex-col gap-1.5">
@@ -167,19 +169,19 @@ function SkeletonRow() {
           </div>
         </div>
       </td>
-      <td className="px-6 py-4">
+      <td className="px-s3 py-s2">
         <div className="h-7 w-24 rounded-full bg-gray-5 animate-pulse" />
       </td>
-      <td className="px-6 py-4">
+      <td className="px-s3 py-s2">
         <div className="h-4 w-20 rounded bg-gray-5 animate-pulse" />
       </td>
-      <td className="px-6 py-4">
+      <td className="px-s3 py-s2">
         <div className="h-4 w-16 rounded bg-gray-5 animate-pulse" />
       </td>
-      <td className="px-6 py-4">
+      <td className="px-s3 py-s2">
         <div className="h-7 w-20 rounded-full bg-gray-5 animate-pulse" />
       </td>
-      <td className="px-6 py-4">
+      <td className="px-s3 py-s2">
         <div className="h-9 w-9 rounded-full bg-gray-5 animate-pulse" />
       </td>
     </tr>

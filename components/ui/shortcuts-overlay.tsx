@@ -68,7 +68,7 @@ export function ShortcutsOverlay({
         <div className="flex flex-col gap-4">
           {groups.map((group) => (
             <div key={group.title}>
-              <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-3 mb-2">
+              <p className="text-2xs font-bold tracking-[0.2em] uppercase text-gray-3 mb-2">
                 {group.title}
               </p>
               <ul className="flex flex-col gap-1.5">

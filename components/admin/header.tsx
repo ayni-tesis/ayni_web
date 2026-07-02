@@ -72,7 +72,7 @@ export function Header() {
             }}
             placeholder={t.header.searchPlaceholder}
             aria-label={t.common.search}
-            className="flex-1 bg-transparent text-base text-black-2 placeholder:text-gray-3 outline-none"
+            className="flex-1 bg-transparent text-base text-black-2 placeholder:text-gray-2 outline-none"
           />
           <Kbd className="hidden md:inline-flex">/</Kbd>
         </label>
@@ -80,20 +80,20 @@ export function Header() {
         {showDropdown && (
           <div className="absolute left-0 right-0 top-[52px] z-50 bg-white border border-gray-5 rounded-2xl shadow-lg overflow-hidden max-h-[420px] overflow-y-auto">
             {isFetching && results.length === 0 ? (
-              <p className="px-4 py-3 text-sm text-gray-3">Buscando…</p>
+              <p className="px-4 py-3 text-sm text-gray-3">{t.header.searching}</p>
             ) : results.length === 0 ? (
-              <p className="px-4 py-3 text-sm text-gray-3">Sin resultados para “{query.trim()}”.</p>
+              <p className="px-4 py-3 text-sm text-gray-3">{t.header.noResults(query.trim())}</p>
             ) : (
               <>
                 {plagues.length > 0 && (
-                  <SearchGroup label="Plagas">
+                  <SearchGroup label={t.header.groupPlagues}>
                     {plagues.map((r) => (
                       <SearchRow key={`p-${r.id}`} icon={<Sprout size={16} />} result={r} onSelect={select} />
                     ))}
                   </SearchGroup>
                 )}
                 {users.length > 0 && (
-                  <SearchGroup label="Caficultores">
+                  <SearchGroup label={t.header.groupFarmers}>
                     {users.map((r) => (
                       <SearchRow key={`u-${r.id}`} icon={<User size={16} />} result={r} onSelect={select} />
                     ))}
@@ -124,6 +124,7 @@ export function Header() {
             <p className="text-xs leading-tight text-gray-3">{user ? ROLE_LABELS[user.role] : ""}</p>
           </div>
           <div
+            role="img"
             aria-label={t.common.profile}
             className="h-10 w-10 rounded-full bg-secondary text-primary font-bold flex items-center justify-center text-sm shrink-0"
           >
@@ -147,7 +148,7 @@ export function Header() {
 function SearchGroup({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="py-1">
-      <p className="px-4 py-1 text-[11px] font-bold uppercase tracking-wider text-gray-3">{label}</p>
+      <p className="px-4 py-1 text-2xs font-bold uppercase tracking-wider text-gray-3">{label}</p>
       {children}
     </div>
   );

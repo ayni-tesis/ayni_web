@@ -1,15 +1,20 @@
 "use client";
 
-import { Bug, Plus, X } from "lucide-react";
-import { useCallback, useState } from "react";
+import { Bug, Keyboard, Plus, X } from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
 import { PageHeader } from "@/components/admin/page-header";
 import { PlagueCard } from "@/components/plagues/plague-card";
 import { PlagueCardSkeleton } from "@/components/plagues/plague-card-skeleton";
 import { SeverityFilter } from "@/components/plagues/severity-filter";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
+import {
+  type ShortcutGroup,
+  ShortcutsOverlay,
+} from "@/components/ui/shortcuts-overlay";
 import { TopProgressBar } from "@/components/ui/top-progress-bar";
 import type { Plague, Severity } from "@/lib/api/types";
+import { useHotkeys } from "@/lib/hooks/use-hotkeys";
 import { usePlagues } from "@/lib/hooks/use-plagues";
 import { t } from "@/lib/i18n/es";
 
@@ -18,6 +23,7 @@ const SKELETON_COUNT = 6;
 
 export default function CatalogPage() {
   const [severities, setSeverities] = useState<Severity[]>([]);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
 
   const { data, isLoading, isFetching, isError, refetch } = usePlagues({
     page: 0,
@@ -34,6 +40,17 @@ export default function CatalogPage() {
   const plagues = data?.content ?? [];
   const isEmpty = !isLoading && !isError && plagues.length === 0;
 
+  useHotkeys(
+    useMemo(() => [{ key: "?", handler: () => setShortcutsOpen(true) }], []),
+  );
+
+  const shortcutGroups: ShortcutGroup[] = [
+    {
+      title: t.catalog.title,
+      items: [{ keys: ["?"], label: t.shortcuts.showHelp }],
+    },
+  ];
+
   return (
     <div>
       <PageHeader
@@ -41,6 +58,14 @@ export default function CatalogPage() {
         description={t.catalog.description}
         actions={
           <>
+            <button
+              type="button"
+              onClick={() => setShortcutsOpen(true)}
+              aria-label={t.shortcuts.showHelp}
+              className="press focus-ring h-11 w-11 rounded-full border border-gray-5 text-gray-1 hover:bg-gray-5 inline-flex items-center justify-center transition-colors"
+            >
+              <Keyboard size={18} />
+            </button>
             <SeverityFilter value={severities} onChange={setSeverities} />
             <button
               type="button"
@@ -97,21 +122,35 @@ export default function CatalogPage() {
             />
           </div>
         ) : (
-          <ul className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-            {isLoading
-              ? Array.from({ length: SKELETON_COUNT }).map((_, i) => (
-                  <li key={i}>
-                    <PlagueCardSkeleton />
-                  </li>
-                ))
-              : plagues.map((plague) => (
-                  <li key={plague.id}>
-                    <PlagueCard plague={plague} onEdit={handleEdit} />
-                  </li>
-                ))}
-          </ul>
+          <>
+            <ul className="grid gap-s2 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+              {isLoading
+                ? Array.from({ length: SKELETON_COUNT }).map((_, i) => (
+                    // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton list, never reordered
+                    <li key={i}>
+                      <PlagueCardSkeleton />
+                    </li>
+                  ))
+                : plagues.map((plague) => (
+                    <li key={plague.id}>
+                      <PlagueCard plague={plague} onEdit={handleEdit} />
+                    </li>
+                  ))}
+            </ul>
+            {data && data.totalElements > plagues.length && (
+              <p className="py-s2 text-sm text-gray-3 text-center">
+                Mostrando {plagues.length} de {data.totalElements} plagas.
+              </p>
+            )}
+          </>
         )}
       </div>
+
+      <ShortcutsOverlay
+        open={shortcutsOpen}
+        onClose={() => setShortcutsOpen(false)}
+        groups={shortcutGroups}
+      />
     </div>
   );
 }

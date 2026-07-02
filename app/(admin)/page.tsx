@@ -5,15 +5,19 @@ import {
   AlertTriangle,
   ArrowUpRight,
   CheckSquare,
+  ClipboardCheck,
   MapPin,
   Sparkles,
   Users,
 } from "lucide-react";
 import Link from "next/link";
 import { PageHeader } from "@/components/admin/page-header";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PanelSkeleton } from "@/components/ui/panel-skeleton";
+import { StatCell, StatStrip } from "@/components/ui/stat-strip";
 import type { AdminDiagnosis } from "@/lib/api/diagnoses";
-import { useDashboardStats, useDiagnoses } from "@/lib/hooks/use-diagnoses";
 import { formatRelativeTime } from "@/lib/format";
+import { useDashboardStats, useDiagnoses } from "@/lib/hooks/use-diagnoses";
 import { t } from "@/lib/i18n/es";
 
 // El estado de salud de los servicios pertenece a Monitoreo (Fase 4 de integración).
@@ -38,7 +42,10 @@ function locationOf(d: AdminDiagnosis): string {
 
 export default function HomePage() {
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
-  const { data: recent, isLoading: recentLoading } = useDiagnoses({ page: 0, size: 5 });
+  const { data: recent, isLoading: recentLoading } = useDiagnoses({
+    page: 0,
+    size: 5,
+  });
 
   const cards = [
     {
@@ -46,28 +53,28 @@ export default function HomePage() {
       value: statsLoading ? "—" : String(stats?.activeFarmers ?? 0),
       change: "Con diagnósticos registrados",
       icon: Users,
-      color: "text-primary bg-secondary border border-primary/20",
+      iconClass: "text-gray-3",
     },
     {
       label: t.home.stats.pendingValidation,
       value: statsLoading ? "—" : String(stats?.pendingValidation ?? 0),
       change: "Confianza < 60%",
       icon: CheckSquare,
-      color: "text-warning bg-warning/10 border border-warning/20",
+      iconClass: "text-warning",
     },
     {
       label: t.home.stats.activeAlerts,
       value: statsLoading ? "—" : String(stats?.criticalAlerts ?? 0),
       change: "Severidad > 70%",
       icon: AlertTriangle,
-      color: "text-error bg-error/10 border border-error/20",
+      iconClass: "text-error",
     },
     {
-      label: "Confianza media del modelo",
+      label: t.home.stats.modelConfidence,
       value: statsLoading ? "—" : pct(stats?.avgConfidence, 1),
       change: stats?.topPest ? `Plaga frecuente: ${stats.topPest}` : "—",
       icon: Sparkles,
-      color: "text-primary bg-secondary border border-primary/20",
+      iconClass: "text-gray-3",
     },
   ];
 
@@ -77,26 +84,18 @@ export default function HomePage() {
     <div className="flex flex-col gap-s3">
       <PageHeader title={t.home.title} description={t.home.description} />
 
-      <div className="grid gap-s2 grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
-        {cards.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <div
-              key={stat.label}
-              className="bg-white rounded-2xl border border-gray-5 p-s2 flex items-start justify-between"
-            >
-              <div className="flex flex-col gap-s1">
-                <span className="text-sm font-normal text-gray-2">{stat.label}</span>
-                <span className="text-3xl font-bold text-black-2">{stat.value}</span>
-                <span className="text-xs font-normal text-gray-3">{stat.change}</span>
-              </div>
-              <div className={`h-12 w-12 rounded-xl flex items-center justify-center shrink-0 ${stat.color}`}>
-                <Icon size={24} />
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      <StatStrip className="grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
+        {cards.map((stat) => (
+          <StatCell
+            key={stat.label}
+            icon={stat.icon}
+            iconClass={stat.iconClass}
+            label={stat.label}
+            value={stat.value}
+            hint={stat.change}
+          />
+        ))}
+      </StatStrip>
 
       <div className="grid gap-s3 grid-cols-1 xl:grid-cols-3">
         {/* Diagnósticos recientes (real) */}
@@ -104,22 +103,30 @@ export default function HomePage() {
           <div className="bg-white rounded-2xl border border-gray-5 p-s3 flex flex-col gap-s2">
             <div className="flex items-center justify-between">
               <div>
-                <h6 className="text-h6 font-bold text-black-2">{t.home.recentDiagnoses}</h6>
-                <p className="text-sm text-gray-3 font-normal mt-s1">{t.home.recentDiagnosesDesc}</p>
+                <h6 className="text-h6 font-bold text-black-2">
+                  {t.home.recentDiagnoses}
+                </h6>
+                <p className="text-sm text-gray-3 font-normal mt-s1">
+                  {t.home.recentDiagnosesDesc}
+                </p>
               </div>
               <Link
                 href="/diagnoses"
                 className="press focus-ring h-10 px-s2 rounded-full border border-gray-5 text-sm font-bold text-primary hover:bg-secondary flex items-center gap-s1 transition-colors"
               >
-                Ver todo
+                {t.home.viewAll}
                 <ArrowUpRight size={16} />
               </Link>
             </div>
 
             {recentLoading ? (
-              <p className="py-s2 text-sm text-gray-3">Cargando…</p>
+              <PanelSkeleton rows={5} />
             ) : recentItems.length === 0 ? (
-              <p className="py-s2 text-sm text-gray-3">Aún no hay diagnósticos registrados.</p>
+              <EmptyState
+                icon={ClipboardCheck}
+                title={t.home.noDiagnoses}
+                body=""
+              />
             ) : (
               <ul className="flex flex-col divide-y divide-gray-5 border-t border-gray-5">
                 {recentItems.map((d) => (
@@ -137,12 +144,21 @@ export default function HomePage() {
                               : "bg-warning"
                         }`}
                       />
+                      <span className="sr-only">
+                        {d.pestType === "HEALTHY"
+                          ? t.home.severityLabel.healthy
+                          : (d.severity ?? 0) > 0.7
+                            ? t.home.severityLabel.high
+                            : t.home.severityLabel.medium}
+                      </span>
                       <div className="min-w-0">
                         <p className="text-base font-bold text-black-2 leading-snug">
                           {d.pestName}
                         </p>
                         <div className="flex flex-wrap items-center gap-x-s2 gap-y-s1 text-sm text-gray-2 mt-s1">
-                          <span className="font-semibold text-black-3">{d.farmerLabel}</span>
+                          <span className="font-semibold text-black-3">
+                            {d.farmerLabel}
+                          </span>
                           <span className="text-gray-4">•</span>
                           <span className="flex items-center gap-s1">
                             <MapPin size={14} className="text-gray-3" />
@@ -155,10 +171,14 @@ export default function HomePage() {
                     <div className="flex items-center gap-s2 shrink-0 self-end md:self-center">
                       <div className="flex flex-col items-end">
                         <span className="text-sm font-bold text-black-2">
-                          {d.pestType === "HEALTHY" ? "Sana" : `Confianza: ${pct(d.confidence)}`}
+                          {d.pestType === "HEALTHY"
+                            ? t.home.healthy
+                            : `Confianza: ${pct(d.confidence)}`}
                         </span>
                         <span className="text-xs text-gray-3 mt-s1">
-                          {d.capturedAt ? formatRelativeTime(d.capturedAt) : "—"}
+                          {d.capturedAt
+                            ? formatRelativeTime(d.capturedAt)
+                            : "—"}
                         </span>
                       </div>
                       <span
@@ -168,7 +188,9 @@ export default function HomePage() {
                             : "bg-gray-5 text-gray-1 border border-gray-4/20"
                         }`}
                       >
-                        {d.source === "OFFLINE_SYNCED" ? "Offline" : "En vivo"}
+                        {d.source === "OFFLINE_SYNCED"
+                          ? t.home.sourceSynced
+                          : t.home.sourceLive}
                       </span>
                     </div>
                   </li>
@@ -182,9 +204,11 @@ export default function HomePage() {
         <div className="flex flex-col gap-s3">
           <div className="bg-white rounded-2xl border border-gray-5 p-s3 flex flex-col gap-s2">
             <div>
-              <h6 className="text-h6 font-bold text-black-2">{t.home.systemStatus}</h6>
+              <h6 className="text-h6 font-bold text-black-2">
+                {t.home.systemStatus}
+              </h6>
               <p className="text-sm text-gray-3 font-normal mt-s1">
-                Vista previa — el monitoreo en vivo se conecta en Monitoreo.
+                {t.home.systemStatusPreview}
               </p>
             </div>
             <ul className="flex flex-col gap-s2">
@@ -194,10 +218,16 @@ export default function HomePage() {
                   className="flex items-center justify-between p-s2 rounded-xl bg-gray-5/40 border border-gray-5"
                 >
                   <div className="flex items-center gap-s2">
-                    <span className="h-2 w-2 rounded-full bg-gray-4" />
-                    <span className="text-sm font-bold text-black-2">{name}</span>
+                    <span
+                      role="img"
+                      className="h-2 w-2 rounded-full bg-gray-4 dot-pulse"
+                      aria-label={t.serviceStatus.up}
+                    />
+                    <span className="text-sm font-bold text-black-2">
+                      {name}
+                    </span>
                   </div>
-                  <span className="px-2 py-0.5 rounded bg-gray-5 text-gray-2 text-[10px] font-bold border border-gray-4/20">
+                  <span className="px-2 py-0.5 rounded-xl bg-gray-5 text-gray-2 text-2xs font-bold border border-gray-4/20">
                     —
                   </span>
                 </li>
@@ -208,19 +238,20 @@ export default function HomePage() {
               className="press focus-ring h-11 w-full rounded-full border border-gray-5 text-sm font-bold text-gray-1 hover:bg-gray-5 flex items-center justify-center gap-s1 mt-s1 transition-colors"
             >
               <Activity size={16} />
-              Ir a Monitoreo
+              {t.home.goToMonitoring}
             </Link>
           </div>
 
-          <div className="bg-black-3 rounded-2xl p-s3 text-white flex flex-col gap-s2 relative overflow-hidden border border-gray-4/20 shadow-sm">
+          <div className="bg-forest-deep rounded-2xl p-s3 text-white flex flex-col gap-s2 relative overflow-hidden">
             <div className="flex flex-col gap-s1 relative z-10">
-              <span className="text-xs font-bold text-secondary uppercase tracking-wider">
-                COLA DE ETIQUETADO
+              <span className="text-2xs font-bold text-secondary uppercase tracking-[0.25em]">
+                {t.home.labelingQueue}
               </span>
-              <h5 className="text-xl font-bold mt-s1">Mejora el Dataset del Modelo</h5>
+              <h5 className="text-xl font-bold mt-s1">{t.home.labelingCta}</h5>
               <p className="text-sm text-white/80 font-normal mt-s2 leading-relaxed">
-                Hay <strong>{statsLoading ? "…" : (stats?.pendingValidation ?? 0)}</strong>{" "}
-                diagnósticos con baja confianza (&lt; 60%) que requieren validación experta.
+                {statsLoading
+                  ? "…"
+                  : t.home.labelingBody(stats?.pendingValidation ?? 0)}
               </p>
             </div>
             <Link
@@ -228,7 +259,7 @@ export default function HomePage() {
               className="press focus-ring h-11 w-full bg-primary text-white rounded-full font-bold text-sm flex items-center justify-center gap-s1 relative z-10 shadow-sm hover:opacity-85 transition-opacity"
             >
               <CheckSquare size={16} />
-              Validar Imágenes
+              {t.home.validateImages}
             </Link>
           </div>
         </div>

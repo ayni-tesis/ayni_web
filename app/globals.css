@@ -5,11 +5,28 @@
   --color-primary: #04a033;
   --color-secondary: #ddffe7;
 
+  /* Brand surfaces (brand kit /brand) */
+  --color-cream: #f5f1e8;
+  --color-cream-2: #eee8d8;
+  --color-forest: #053d1f;
+  --color-forest-2: #0f2a1b;
+  --color-forest-deep: #0a1f12;
+
   /* State colors */
   --color-info: #c2bfbf;
   --color-success: #27ae60;
   --color-warning: #e2b93b;
+  --color-warning-ink: #4d3d0c;
   --color-error: #eb5757;
+
+  /* Soft tints (avatar/estado sobre blanco) */
+  --color-error-soft: #ffe5e5;
+  --color-warning-soft: #fff4d6;
+
+  /* Semantic accents */
+  --color-agronomist: #3b6fe0;
+  --color-agronomist-soft: #e8f1ff;
+  --color-severity-high: #a02323;
 
   /* Black scale */
   --color-black-1: #000000;
@@ -62,6 +79,9 @@
   --text-sm: 14px;
   --text-sm--line-height: 19.6px;
 
+  --text-2xs: 11px;
+  --text-2xs--line-height: 14px;
+
   /* Spacing scale (AYNI) */
   --spacing-s1: 8px;
   --spacing-s2: 16px;
@@ -84,7 +104,7 @@
 
 html,
 body {
-  background-color: var(--color-gray-5);
+  background-color: var(--color-cream);
   color: var(--color-black-2);
   font-family: var(--font-sans);
 }
@@ -123,6 +143,21 @@ body {
 }
 .dot-pulse {
   animation: dot-pulse 1.6s ease-in-out infinite;
+}
+
+/* Entrada suave (login / superficies de marca) */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.rise {
+  animation: rise var(--duration-slow) var(--ease-out) both;
 }
 
 /* Top progress bar (indeterminate) */

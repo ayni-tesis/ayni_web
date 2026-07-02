@@ -1,7 +1,7 @@
 "use client";
 
 import { Bell, CheckCheck } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { type AppNotification, notificationText } from "@/lib/api/notifications";
 import {
   useMarkAllNotificationsRead,
@@ -24,6 +24,7 @@ function relativeTime(iso: string): string {
 
 export function NotificationsMenu() {
   const [open, setOpen] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
   const { data, isLoading, isError } = useNotifications();
   const { data: unread } = useUnreadCount();
   const markRead = useMarkNotificationRead();
@@ -42,26 +43,31 @@ export function NotificationsMenu() {
         type="button"
         aria-label={t.common.notifications}
         onClick={() => setOpen((v) => !v)}
-        onBlur={() => setTimeout(() => setOpen(false), 150)}
+        onBlur={(e) => {
+          if (panelRef.current?.contains(e.relatedTarget as Node)) return;
+          setTimeout(() => setOpen(false), 150);
+        }}
         className="press focus-ring relative h-10 w-10 rounded-full flex items-center justify-center text-gray-2 hover:bg-gray-5 transition-colors"
       >
         <Bell size={20} />
         {count > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-error text-white text-[10px] font-bold flex items-center justify-center border-2 border-white">
+          <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-error text-white text-2xs font-bold flex items-center justify-center border-2 border-white">
             {count > 99 ? "99+" : count}
           </span>
         )}
       </button>
 
       {open && (
+        // biome-ignore lint/a11y/noStaticElementInteractions: onMouseDown solo previene el blur del botón disparador; no es un handler de interacción del usuario
         <div
+          ref={panelRef}
           className="absolute right-0 top-[52px] z-50 w-[360px] max-h-[480px] bg-white border border-gray-5 rounded-2xl shadow-lg overflow-hidden flex flex-col"
           // evita que el blur del botón cierre el panel antes del click
           onMouseDown={(e) => e.preventDefault()}
         >
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-5">
             <span className="text-sm font-bold text-black-2">
-              Notificaciones{count > 0 ? ` (${count})` : ""}
+              {count > 0 ? t.notifications.titleWithCount(count) : t.notifications.title}
             </span>
             {count > 0 && (
               <button
@@ -71,21 +77,21 @@ export function NotificationsMenu() {
                 className="press text-xs font-bold text-primary hover:underline flex items-center gap-s1 disabled:opacity-50"
               >
                 <CheckCheck size={14} />
-                Marcar todas como leídas
+                {t.notifications.markAllRead}
               </button>
             )}
           </div>
 
           <div className="overflow-y-auto">
             {isLoading ? (
-              <p className="px-4 py-6 text-sm text-gray-3 text-center">Cargando…</p>
+              <p className="px-4 py-6 text-sm text-gray-3 text-center">{t.notifications.loading}</p>
             ) : isError ? (
               <p className="px-4 py-6 text-sm text-error text-center">
-                No se pudieron cargar las notificaciones.
+                {t.notifications.error}
               </p>
             ) : items.length === 0 ? (
               <p className="px-4 py-8 text-sm text-gray-3 text-center">
-                No tienes notificaciones pendientes.
+                {t.notifications.empty}
               </p>
             ) : (
               <ul className="divide-y divide-gray-5">
@@ -110,7 +116,7 @@ export function NotificationsMenu() {
                             {notificationText(n.body)}
                           </span>
                         )}
-                        <span className="text-[11px] text-gray-3 font-semibold mt-0.5">
+                        <span className="text-2xs text-gray-3 font-semibold mt-0.5">
                           {relativeTime(n.createdAt)}
                         </span>
                       </span>

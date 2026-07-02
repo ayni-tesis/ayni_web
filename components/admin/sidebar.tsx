@@ -78,24 +78,26 @@ export function Sidebar() {
   const activeHref = getActiveHref(pathname);
 
   return (
-    <aside className="w-64 shrink-0 bg-white border-r border-gray-5 flex flex-col gap-6 py-5 overflow-y-auto">
+    <aside className="w-64 shrink-0 bg-white border-r border-gray-5 flex flex-col gap-s3 py-s2 overflow-y-auto">
       <div className="flex items-center gap-3 px-5">
         <div className="h-12 w-12 rounded-full bg-primary flex items-center justify-center shrink-0">
           <AyniMark size={28} background={null} fill="#fff" veinColor="#04A033" />
         </div>
         <div className="min-w-0">
-          <h5 className="text-h5 font-bold text-black-2 leading-none">AYNI</h5>
-          <p className="text-sm text-gray-3 mt-1 font-normal">
-            Agri-Tech Admin
+          <h5 className="text-h5 font-bold text-black-2 leading-none tracking-tight">
+            {t.brand.wordmark}
+          </h5>
+          <p className="text-2xs font-bold uppercase tracking-[0.25em] text-gray-3 mt-1.5">
+            {t.brand.product}
           </p>
         </div>
       </div>
 
-      <nav className="flex flex-col gap-5 px-3">
+      <nav className="flex flex-col gap-s3 px-3">
         {GROUPS.map((group) => (
           <div key={group.title || "general"} className="flex flex-col gap-2">
             {group.title && (
-              <span className="px-4 text-[11px] font-bold text-gray-3 uppercase tracking-wider block">
+              <span className="px-4 text-2xs font-bold text-gray-3 uppercase tracking-wider block">
                 {group.title}
               </span>
             )}

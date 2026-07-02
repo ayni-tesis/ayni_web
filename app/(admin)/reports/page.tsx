@@ -10,14 +10,19 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { PageHeader } from "@/components/admin/page-header";
+import { EmptyState } from "@/components/ui/empty-state";
+import { ErrorState } from "@/components/ui/error-state";
+import { PanelSkeleton } from "@/components/ui/panel-skeleton";
 import {
+  REPORT_TYPE_LABELS,
   type Report,
   type ReportFormat,
   type ReportType,
-  REPORT_TYPE_LABELS,
   reportsService,
 } from "@/lib/api/reports";
 import { useGenerateReport, useReports } from "@/lib/hooks/use-reports";
+import { toast } from "@/lib/hooks/use-toast";
+import { t } from "@/lib/i18n/es";
 
 const SECTORS = [
   "Todos los sectores",
@@ -29,13 +34,21 @@ const SECTORS = [
 
 function StatusBadge({ status }: { status: Report["status"] }) {
   const map = {
-    GENERATING: { label: "Generando", cls: "bg-warning/15 text-warning" },
-    READY: { label: "Listo", cls: "bg-success/15 text-success" },
-    FAILED: { label: "Error", cls: "bg-error/15 text-error" },
+    GENERATING: {
+      label: "Generando",
+      cls: "bg-warning/10 text-warning-ink border-warning/20",
+    },
+    READY: {
+      label: "Listo",
+      cls: "bg-success/10 text-success border-success/20",
+    },
+    FAILED: { label: "Error", cls: "bg-error/10 text-error border-error/20" },
   } as const;
   const s = map[status];
   return (
-    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${s.cls}`}>
+    <span
+      className={`rounded-full px-2.5 py-1 text-2xs font-bold border inline-flex items-center gap-1 ${s.cls}`}
+    >
       {s.label}
     </span>
   );
@@ -49,35 +62,43 @@ export default function ReportsPage() {
   const [sector, setSector] = useState(SECTORS[0]);
   const [anonymizeData, setAnonymizeData] = useState(true);
 
-  const { data, isLoading, isError } = useReports();
+  const { data, isLoading, isError, refetch, isFetching } = useReports();
   const generate = useGenerateReport();
 
   const reports = data?.content ?? [];
 
   function handleGenerate(e: React.FormEvent) {
     e.preventDefault();
-    generate.mutate({
-      type: reportType,
-      format,
-      periodStart: periodStart || undefined,
-      periodEnd: periodEnd || undefined,
-      district: sector === SECTORS[0] ? undefined : sector,
-    });
+    generate.mutate(
+      {
+        type: reportType,
+        format,
+        periodStart: periodStart || undefined,
+        periodEnd: periodEnd || undefined,
+        district: sector === SECTORS[0] ? undefined : sector,
+      },
+      {
+        onSuccess: () =>
+          toast({ title: t.reportsPage.toasts.generated, tone: "success" }),
+        onError: () =>
+          toast({ title: t.reportsPage.toasts.generateError, tone: "error" }),
+      },
+    );
   }
 
   async function handleDownload(report: Report) {
     try {
       await reportsService.download(report);
     } catch {
-      window.alert("No se pudo descargar el reporte.");
+      toast({ title: t.reportsPage.toasts.downloadError, tone: "error" });
     }
   }
 
   return (
     <div className="flex flex-col gap-s3">
       <PageHeader
-        title="Reportes Fitosanitarios"
-        description="Genera documentos oficiales consolidados para SENASA y exportaciones de incidentes."
+        title={t.reportsPage.title}
+        description={t.reportsPage.description}
       />
 
       <div className="grid gap-s3 grid-cols-1 lg:grid-cols-12">
@@ -88,22 +109,25 @@ export default function ReportsPage() {
         >
           <div className="flex items-center gap-s2 text-primary font-bold">
             <FileText size={20} />
-            <span>Configurar Reporte</span>
+            <span>{t.reportsPage.configureTitle}</span>
           </div>
 
           <div className="flex flex-col gap-s1">
-            <label htmlFor="report-type" className="text-sm font-bold text-gray-2">
+            <label
+              htmlFor="report-type"
+              className="text-sm font-bold text-gray-2"
+            >
               Tipo de Reporte
             </label>
             <select
               id="report-type"
               value={reportType}
               onChange={(e) => setReportType(e.target.value as ReportType)}
-              className="press h-12 w-full px-4 rounded-xl border border-gray-5 bg-gray-5/50 text-base font-bold focus:ring-2 focus:ring-primary outline-none"
+              className="press h-11 w-full px-4 rounded-xl border border-gray-5 bg-gray-5/50 text-base font-bold focus:ring-2 focus:ring-primary outline-none"
             >
-              {(Object.keys(REPORT_TYPE_LABELS) as ReportType[]).map((t) => (
-                <option key={t} value={t}>
-                  {REPORT_TYPE_LABELS[t]}
+              {(Object.keys(REPORT_TYPE_LABELS) as ReportType[]).map((rt) => (
+                <option key={rt} value={rt}>
+                  {REPORT_TYPE_LABELS[rt]}
                 </option>
               ))}
             </select>
@@ -145,7 +169,10 @@ export default function ReportsPage() {
 
           <div className="grid grid-cols-2 gap-s2">
             <div className="flex flex-col gap-s1">
-              <label htmlFor="d-start" className="text-sm font-bold text-gray-2">
+              <label
+                htmlFor="d-start"
+                className="text-sm font-bold text-gray-2"
+              >
                 Fecha Inicio
               </label>
               <input
@@ -170,15 +197,15 @@ export default function ReportsPage() {
             </div>
           </div>
 
-          <div className="p-s2 rounded-xl bg-secondary/40 border border-primary/10 flex flex-col gap-s2">
-            <div className="flex items-start gap-s1 text-primary">
-              <ShieldAlert size={18} className="shrink-0 mt-s1" />
+          <div className="p-s2 rounded-xl bg-cream-2/70 border border-gray-5 flex flex-col gap-s2">
+            <div className="flex items-start gap-s1">
+              <ShieldAlert size={18} className="shrink-0 mt-s1 text-gray-2" />
               <div className="flex flex-col gap-s1">
-                <span className="text-xs font-bold uppercase tracking-wider">
-                  Cumplimiento de Privacidad
+                <span className="text-xs font-bold text-black-2">
+                  {t.reportsPage.privacyTitle}
                 </span>
-                <span className="text-xs text-primary font-semibold leading-relaxed">
-                  Ley de Protección de Datos Personales (Ley N.º 29733)
+                <span className="text-xs text-gray-2 font-semibold leading-relaxed">
+                  {t.reportsPage.privacyLaw}
                 </span>
               </div>
             </div>
@@ -190,21 +217,25 @@ export default function ReportsPage() {
                 className="h-5 w-5 rounded border-gray-4 text-primary focus:ring-primary outline-none"
               />
               <span className="text-xs font-bold text-gray-1">
-                Anonimizar nombres y coordenadas (SENASA y zona se anonimizan siempre)
+                {t.reportsPage.anonymize}
               </span>
             </label>
           </div>
 
           {generate.isError && (
-            <p role="alert" className="rounded-xl bg-error/10 px-4 py-2 text-sm text-error">
-              No se pudo generar el reporte. ¿Tienes permisos de administrador/agrónomo?
+            <p
+              role="alert"
+              className="rounded-xl bg-error/10 px-4 py-2 text-sm text-error"
+            >
+              No se pudo generar el reporte. ¿Tienes permisos de
+              administrador/agrónomo?
             </p>
           )}
 
           <button
             type="submit"
             disabled={generate.isPending}
-            className="press focus-ring h-12 w-full bg-primary text-white hover:opacity-85 disabled:opacity-50 font-bold text-base flex items-center justify-center gap-s1 transition-all shadow-sm rounded-full"
+            className="press focus-ring h-11 w-full bg-primary text-white hover:opacity-85 disabled:opacity-50 font-bold text-base flex items-center justify-center gap-s1 transition-all shadow-sm rounded-full"
           >
             {generate.isPending ? (
               <>
@@ -223,18 +254,20 @@ export default function ReportsPage() {
         {/* Lista de reportes */}
         <div className="lg:col-span-7 bg-white rounded-2xl border border-gray-5 p-s3 flex flex-col gap-s2">
           <div>
-            <h6 className="text-base font-bold text-black-2">Documentos Recientes</h6>
+            <h6 className="text-base font-bold text-black-2">
+              {t.reportsPage.recentTitle}
+            </h6>
             <p className="text-sm text-gray-3 font-normal mt-s1">
-              Historial de reportes generados. La descarga se habilita cuando el estado es “Listo”.
+              {t.reportsPage.recentDesc}
             </p>
           </div>
 
           {isError ? (
-            <p className="py-s2 text-sm text-error">No se pudo cargar el historial de reportes.</p>
+            <ErrorState onRetry={() => refetch()} retrying={isFetching} />
           ) : isLoading ? (
-            <p className="py-s2 text-sm text-gray-3">Cargando…</p>
+            <PanelSkeleton rows={3} />
           ) : reports.length === 0 ? (
-            <p className="py-s2 text-sm text-gray-3">Aún no hay reportes generados.</p>
+            <EmptyState icon={FileText} title={t.reportsPage.empty} body="" />
           ) : (
             <ul className="flex flex-col divide-y divide-gray-5 border-t border-gray-5">
               {reports.map((rep) => (
@@ -243,7 +276,7 @@ export default function ReportsPage() {
                   className="py-s2 flex flex-col sm:flex-row sm:items-center justify-between gap-s1"
                 >
                   <div className="flex items-start gap-s1">
-                    <div className="h-10 w-10 rounded-lg bg-gray-5 text-gray-2 flex items-center justify-center shrink-0 border border-gray-4/20">
+                    <div className="h-10 w-10 rounded-xl bg-gray-5 text-gray-2 flex items-center justify-center shrink-0 border border-gray-4/20">
                       <FileText size={20} />
                     </div>
                     <div className="min-w-0">
@@ -254,7 +287,9 @@ export default function ReportsPage() {
                         <StatusBadge status={rep.status} />
                         <span>{rep.format}</span>
                         <span>•</span>
-                        <span>{new Date(rep.requestedAt).toLocaleString("es-PE")}</span>
+                        <span>
+                          {new Date(rep.requestedAt).toLocaleString("es-PE")}
+                        </span>
                         {rep.rowCount != null && (
                           <>
                             <span>•</span>
@@ -285,8 +320,9 @@ export default function ReportsPage() {
           <div className="p-s2 rounded-xl bg-gray-5/50 border border-gray-5 flex gap-s1 items-start text-xs text-gray-2 leading-relaxed">
             <Info size={16} className="shrink-0 text-gray-3 mt-s1" />
             <span>
-              Los reportes SENASA y por zona anonimizan al agricultor (Ley N.º 29733).
-              La generación es asíncrona: el estado pasa de “Generando” a “Listo” automáticamente.
+              Los reportes SENASA y por zona anonimizan al agricultor (Ley N.º
+              29733). La generación es asíncrona: el estado pasa de "Generando"
+              a "Listo" automáticamente.
             </span>
           </div>
         </div>

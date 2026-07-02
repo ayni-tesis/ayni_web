@@ -43,7 +43,7 @@ export function UsersPagination({
   const window = buildPageWindow(page, totalPages);
 
   return (
-    <div className="flex items-center justify-between gap-4 flex-wrap px-6 py-4">
+    <div className="flex items-center justify-between gap-4 flex-wrap px-s3 py-s2">
       <p className="text-base text-gray-2 tabular-nums">
         {t.users.pagination.summary(from, to, totalElements)}
       </p>
@@ -54,7 +54,7 @@ export function UsersPagination({
           onClick={() => onPageChange(page - 1)}
           disabled={page === 0}
           aria-label={t.users.pagination.prev}
-          className="press focus-ring h-10 w-10 inline-flex items-center justify-center rounded-xl border border-gray-5 text-gray-1 hover:bg-gray-5 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="press focus-ring h-10 w-10 inline-flex items-center justify-center rounded-full border border-gray-5 text-gray-1 hover:bg-gray-5 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           <ChevronLeft size={18} />
         </button>
@@ -74,7 +74,7 @@ export function UsersPagination({
               onClick={() => onPageChange(item)}
               aria-current={item === page ? "page" : undefined}
               className={cn(
-                "press focus-ring h-10 min-w-10 px-3 rounded-xl text-base font-bold tabular-nums transition-colors",
+                "press focus-ring h-10 min-w-10 px-3 rounded-full text-base font-bold tabular-nums transition-colors",
                 item === page
                   ? "bg-secondary border border-primary text-primary"
                   : "border border-gray-5 text-gray-1 hover:bg-gray-5",
@@ -90,7 +90,7 @@ export function UsersPagination({
           onClick={() => onPageChange(page + 1)}
           disabled={page >= totalPages - 1}
           aria-label={t.users.pagination.next}
-          className="press focus-ring h-10 w-10 inline-flex items-center justify-center rounded-xl border border-gray-5 text-gray-1 hover:bg-gray-5 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="press focus-ring h-10 w-10 inline-flex items-center justify-center rounded-full border border-gray-5 text-gray-1 hover:bg-gray-5 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           <ChevronRight size={18} />
         </button>

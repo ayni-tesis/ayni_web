@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 const SEVERITY_DOTS: Record<Severity, string> = {
   CRITICAL: "bg-error",
-  HIGH_RISK: "bg-[#A02323]",
+  HIGH_RISK: "bg-severity-high",
   MODERATE: "bg-warning",
   LOW: "bg-primary",
 };

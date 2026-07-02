@@ -1,9 +1,8 @@
 "use client";
 
-import { X } from "lucide-react";
-import { type FormEvent, type ReactNode, useEffect, useState } from "react";
-import { createPortal } from "react-dom";
+import { type FormEvent, type ReactNode, useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
+import { ModalShell } from "@/components/ui/modal-shell";
 import type { User, UserRole, UserStatus } from "@/lib/api/types";
 import { ROLE_LABELS } from "@/lib/api/users";
 import { formatRelativeTime } from "@/lib/format";
@@ -13,76 +12,13 @@ import { RoleBadge } from "./role-badge";
 import { StatusBadge } from "./status-badge";
 
 const inputClass =
-  "h-11 w-full rounded-xl border border-gray-5 bg-white px-4 text-base text-black-2 outline-none focus-ring placeholder:text-gray-3";
+  "h-11 w-full rounded-xl border border-gray-5 bg-white px-4 text-base text-black-2 outline-none focus-ring placeholder:text-gray-2";
 const labelClass = "text-sm font-bold text-black-2";
 
 const ROLE_OPTIONS: UserRole[] = ["FARMER", "AGRONOMIST", "ADMIN"];
 const STATUS_OPTIONS: UserStatus[] = ["ACTIVE", "INACTIVE"];
 
 const f = t.users.form;
-
-// ─── Shell reutilizable (portal + backdrop + Escape), igual patrón que ShortcutsOverlay ───
-
-function ModalShell({
-  title,
-  subtitle,
-  onClose,
-  children,
-}: {
-  title: string;
-  subtitle?: string;
-  onClose: () => void;
-  children: ReactNode;
-}) {
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [onClose]);
-
-  if (typeof document === "undefined") return null;
-
-  return createPortal(
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label={title}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black-2/40 p-4"
-      onClick={onClose}
-    >
-      <div
-        className="bg-white rounded-2xl w-full max-w-md p-6 shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-start justify-between mb-5">
-          <div>
-            <h2 className="text-h5 font-bold text-black-2 leading-none">
-              {title}
-            </h2>
-            {subtitle ? (
-              <p className="text-sm text-gray-2 mt-1">{subtitle}</p>
-            ) : null}
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label={t.common.close}
-            className="press focus-ring h-9 w-9 rounded-full hover:bg-gray-5 inline-flex items-center justify-center text-gray-2"
-          >
-            <X size={18} />
-          </button>
-        </div>
-        {children}
-      </div>
-    </div>,
-    document.body,
-  );
-}
 
 function Field({
   htmlFor,
@@ -332,7 +268,7 @@ export function EditUserModal({
 function InfoCell({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="rounded-xl border border-gray-5 p-3">
-      <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-3 mb-1.5">
+      <p className="text-2xs font-bold tracking-[0.2em] uppercase text-gray-3 mb-1.5">
         {label}
       </p>
       {children}
@@ -390,3 +326,54 @@ export function ViewUserModal({
     </ModalShell>
   );
 }
+
+// ─── Contraseña temporal (solo lectura + copiar) ─────────────────────────────
+
+export function TempPasswordModal({
+  name,
+  password,
+  onClose,
+}: {
+  name: string;
+  password: string;
+  onClose: () => void;
+}) {
+  const [copied, setCopied] = useState(false);
+  function handleCopy() {
+    navigator.clipboard.writeText(password);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+  return (
+    <ModalShell
+      title={t.users.tempPassword.title}
+      subtitle={t.users.tempPassword.subtitle(name)}
+      onClose={onClose}
+    >
+      <div className="flex flex-col gap-s2">
+        <div className="flex items-center gap-s2 p-s2 rounded-xl border border-gray-5 bg-gray-5/30 font-mono text-base text-black-2 select-all">
+          <span className="flex-1 truncate">{password}</span>
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="press focus-ring h-9 px-3 rounded-full border border-gray-5 text-sm font-bold text-gray-1 hover:bg-gray-5 transition-colors flex items-center gap-s1"
+          >
+            {copied ? t.users.tempPassword.copied : t.users.tempPassword.copy}
+          </button>
+        </div>
+        <p className="text-xs text-gray-3 leading-relaxed">{t.users.tempPassword.hint}</p>
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={onClose}
+            className="press focus-ring h-11 px-5 rounded-full border border-gray-5 text-gray-1 font-bold text-base hover:bg-gray-5 transition-colors"
+          >
+            {t.common.close}
+          </button>
+        </div>
+      </div>
+    </ModalShell>
+  );
+}
+
+export { ModalShell } from "@/components/ui/modal-shell";
