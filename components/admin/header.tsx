@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut, Search, Settings, Sprout, User } from "lucide-react";
+import { LogOut, Menu, Search, Settings, Sprout, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { NotificationsMenu } from "@/components/admin/notifications-menu";
@@ -18,7 +18,7 @@ function initials(name: string | undefined): string {
   return (parts[0]?.[0] ?? "A").concat(parts[1]?.[0] ?? "").toUpperCase();
 }
 
-export function Header() {
+export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
   const searchRef = useRef<HTMLInputElement>(null);
   const { user, logout } = useSession();
   const router = useRouter();
@@ -56,8 +56,18 @@ export function Header() {
   }
 
   return (
-    <header className="h-[72px] shrink-0 bg-white border-b border-gray-5 flex items-center justify-between gap-4 px-6">
-      <div className="relative flex-1 max-w-2xl">
+    <header className="h-[72px] shrink-0 bg-white border-b border-gray-5 flex items-center justify-between gap-2 md:gap-4 px-3 md:px-6">
+      {onMenuClick && (
+        <button
+          type="button"
+          onClick={onMenuClick}
+          aria-label={t.sidebar.openMenu}
+          className="press focus-ring lg:hidden h-10 w-10 rounded-full flex items-center justify-center text-gray-1 hover:bg-gray-5 transition-colors shrink-0"
+        >
+          <Menu size={20} />
+        </button>
+      )}
+      <div className="relative flex-1 max-w-2xl min-w-0">
         <label className="flex items-center gap-2 h-11 bg-gray-5 rounded-full px-4 focus-within:bg-white focus-within:ring-2 focus-within:ring-primary transition-colors">
           <Search size={18} className="text-gray-3" aria-hidden />
           <input

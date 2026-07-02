@@ -73,12 +73,23 @@ function getActiveHref(pathname: string): string {
   return prefix ? prefix.href : "/";
 }
 
-export function Sidebar() {
+export function Sidebar({
+  className,
+  onNavigate,
+}: {
+  className?: string;
+  onNavigate?: () => void;
+}) {
   const pathname = usePathname();
   const activeHref = getActiveHref(pathname);
 
   return (
-    <aside className="w-64 shrink-0 bg-white border-r border-gray-5 flex flex-col gap-s3 py-s2 overflow-y-auto">
+    <aside
+      className={cn(
+        "w-64 shrink-0 bg-white border-r border-gray-5 flex flex-col gap-s3 py-s2 overflow-y-auto",
+        className,
+      )}
+    >
       <div className="flex items-center gap-3 px-5">
         <div className="h-12 w-12 rounded-full bg-primary flex items-center justify-center shrink-0">
           <AyniMark size={28} background={null} fill="#fff" veinColor="#04A033" />
@@ -109,6 +120,7 @@ export function Sidebar() {
                   <li key={item.href} className="relative">
                     <Link
                       href={item.href}
+                      onClick={onNavigate}
                       className={cn(
                         "press focus-ring flex items-center gap-3 rounded-full pl-4 pr-6 transition-colors",
                         isActive

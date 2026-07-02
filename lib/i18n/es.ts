@@ -235,6 +235,8 @@ export const t = {
   },
 
   sidebar: {
+    navLabel: "Menú de navegación",
+    openMenu: "Abrir menú",
     groupDiagnosis: "Diagnóstico",
     groupIntelligence: "Inteligencia",
     groupAdmin: "Administración",

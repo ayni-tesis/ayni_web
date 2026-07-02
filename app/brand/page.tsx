@@ -27,7 +27,7 @@ export default function BrandPage() {
     <div className="min-h-screen p-10" style={{ backgroundColor: FOREST }}>
       <BrandHeader />
 
-      <div className="grid grid-cols-3 gap-4 max-w-[1440px] mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 max-w-[1440px] mx-auto">
         <LogoCoverPanel />
         <ConstructionPanel />
         <TaglinePanel />
