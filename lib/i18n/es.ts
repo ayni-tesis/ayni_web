@@ -253,6 +253,11 @@ export const t = {
 
   home: {
     title: "Inicio / Resumen",
+    greeting: (name: string, hour: number) => {
+      const saludo =
+        hour < 12 ? "Buenos días" : hour < 19 ? "Buenas tardes" : "Buenas noches";
+      return `${saludo}, ${name}`;
+    },
     description:
       "Vista general de operaciones, estado fitosanitario e indicadores del modelo.",
     stats: {

@@ -242,7 +242,7 @@ export default function DiagnosesPage() {
                     return (
                       <tr
                         key={d.id}
-                        className="hover:bg-gray-5/30 transition-colors"
+                        className="hover:bg-cream-2/60 transition-colors"
                       >
                         <td className="py-s2 px-s3">
                           <div className="flex flex-col">

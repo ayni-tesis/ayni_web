@@ -124,7 +124,7 @@ export default function PipelinePage() {
             </thead>
             <tbody className="divide-y divide-gray-5 text-black-2">
               {MODEL_HISTORY.map((m) => (
-                <tr key={m.version} className="hover:bg-gray-5/30 transition-colors">
+                <tr key={m.version} className="hover:bg-cream-2/60 transition-colors">
                   <td className="py-s2 px-s3 font-bold">{m.version}</td>
                   <td className="py-s2 px-s3 font-medium">{m.stage}</td>
                   <td className="py-s2 px-s3 text-sm text-gray-1">{m.model}</td>

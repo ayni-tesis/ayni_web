@@ -124,7 +124,7 @@ function UserRow({
   ];
 
   return (
-    <tr className="border-t border-gray-5 hover:bg-gray-5/30 transition-colors">
+    <tr className="border-t border-gray-5 hover:bg-cream-2/60 transition-colors">
       <td className="px-s3 py-s2">
         <div className="flex items-center gap-3">
           <Avatar fullName={user.fullName} src={user.avatarUrl} />

@@ -65,7 +65,7 @@ export default function MonitoringPage() {
                   <TableErrorState colSpan={5} onRetry={() => refetch()} retrying={false} />
                 ) : (
                   list.map((srv) => (
-                    <tr key={srv.name} className="hover:bg-gray-5/30 transition-colors">
+                    <tr key={srv.name} className="hover:bg-cream-2/60 transition-colors">
                       <td className="py-s2 px-s3 font-bold">{srv.name}</td>
                       <td className="py-s2 px-s3 text-sm font-semibold">{srv.instances}</td>
                       <td className="py-s2 px-s3 text-sm text-gray-3 font-mono">—</td>

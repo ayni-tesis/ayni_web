@@ -14,7 +14,7 @@ type PlagueCardProps = {
 
 export function PlagueCard({ plague, onEdit }: PlagueCardProps) {
   return (
-    <article className="group flex flex-col bg-white rounded-2xl border border-gray-5 overflow-hidden transition-colors hover:border-primary/40">
+    <article className="lift group flex flex-col bg-white rounded-2xl border border-gray-5 overflow-hidden hover:border-primary/40">
       <div className="relative aspect-[4/3] bg-gray-5">
         {plague.imageUrl ? (
           // biome-ignore lint/performance/noImgElement: foto servida desde Azure Blob, configuración Next/Image pendiente

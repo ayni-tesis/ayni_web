@@ -86,7 +86,7 @@ export function Sidebar({
   return (
     <aside
       className={cn(
-        "w-64 shrink-0 bg-white border-r border-gray-5 flex flex-col gap-s3 py-s2 overflow-y-auto",
+        "w-64 shrink-0 bg-forest-deep text-white flex flex-col gap-s3 py-s2 overflow-y-auto",
         className,
       )}
     >
@@ -95,10 +95,10 @@ export function Sidebar({
           <AyniMark size={28} background={null} fill="#fff" veinColor="#04A033" />
         </div>
         <div className="min-w-0">
-          <h5 className="text-h5 font-bold text-black-2 leading-none tracking-tight">
+          <h5 className="text-h5 font-bold text-white leading-none tracking-tight">
             {t.brand.wordmark}
           </h5>
-          <p className="text-2xs font-bold uppercase tracking-[0.25em] text-gray-3 mt-1.5">
+          <p className="text-2xs font-bold uppercase tracking-[0.25em] text-white/50 mt-1.5">
             {t.brand.product}
           </p>
         </div>
@@ -108,7 +108,7 @@ export function Sidebar({
         {GROUPS.map((group) => (
           <div key={group.title || "general"} className="flex flex-col gap-2">
             {group.title && (
-              <span className="px-4 text-2xs font-bold text-gray-3 uppercase tracking-wider block">
+              <span className="px-4 text-2xs font-bold text-white/50 uppercase tracking-wider block">
                 {group.title}
               </span>
             )}
@@ -124,8 +124,8 @@ export function Sidebar({
                       className={cn(
                         "press focus-ring flex items-center gap-3 rounded-full pl-4 pr-6 transition-colors",
                         isActive
-                          ? "bg-secondary text-primary font-bold"
-                          : "text-gray-1 hover:bg-gray-5 font-normal",
+                          ? "bg-secondary text-forest font-bold"
+                          : "text-white/75 hover:bg-white/10 hover:text-white font-normal",
                       )}
                       style={{ height: ITEM_HEIGHT }}
                     >

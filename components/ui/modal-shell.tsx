@@ -35,7 +35,7 @@ export function ModalShell({
       role="dialog"
       aria-modal="true"
       aria-label={title}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black-2/40 p-4"
+      className="backdrop-in fixed inset-0 z-50 flex items-center justify-center bg-black-2/40 p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -44,10 +44,10 @@ export function ModalShell({
       }}
     >
       <div
-        className={
+        className={`modal-in ${
           panelClassName ??
           "bg-white rounded-2xl w-full max-w-md p-6 shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
-        }
+        }`}
       >
         <div className="flex items-start justify-between mb-5">
           <div>

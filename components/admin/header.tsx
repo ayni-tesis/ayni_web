@@ -56,7 +56,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
   }
 
   return (
-    <header className="h-[72px] shrink-0 bg-white border-b border-gray-5 flex items-center justify-between gap-2 md:gap-4 px-3 md:px-6">
+    <header className="sticky top-0 z-40 h-[72px] shrink-0 bg-cream/85 backdrop-blur-md border-b border-black-2/5 flex items-center justify-between gap-2 md:gap-4 px-3 md:px-6">
       {onMenuClick && (
         <button
           type="button"
@@ -68,7 +68,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
         </button>
       )}
       <div className="relative flex-1 max-w-2xl min-w-0">
-        <label className="flex items-center gap-2 h-11 bg-gray-5 rounded-full px-4 focus-within:bg-white focus-within:ring-2 focus-within:ring-primary transition-colors">
+        <label className="flex items-center gap-2 h-11 bg-white border border-gray-5 rounded-full px-4 focus-within:ring-2 focus-within:ring-primary focus-within:border-primary transition-colors">
           <Search size={18} className="text-gray-3" aria-hidden />
           <input
             ref={searchRef}
@@ -88,7 +88,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
         </label>
 
         {showDropdown && (
-          <div className="absolute left-0 right-0 top-[52px] z-50 bg-white border border-gray-5 rounded-2xl shadow-lg overflow-hidden max-h-[420px] overflow-y-auto">
+          <div className="pop-in origin-top absolute left-0 right-0 top-[52px] z-50 bg-white border border-gray-5 rounded-2xl shadow-lg overflow-hidden max-h-[420px] overflow-y-auto">
             {isFetching && results.length === 0 ? (
               <p className="px-4 py-3 text-sm text-gray-3">{t.header.searching}</p>
             ) : results.length === 0 ? (

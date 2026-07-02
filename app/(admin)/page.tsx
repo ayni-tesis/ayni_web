@@ -11,11 +11,12 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
-import { PageHeader } from "@/components/admin/page-header";
+import { LandscapeArt } from "@/components/brand/landscape-art";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PanelSkeleton } from "@/components/ui/panel-skeleton";
 import { StatCell, StatStrip } from "@/components/ui/stat-strip";
 import type { AdminDiagnosis } from "@/lib/api/diagnoses";
+import { useSession } from "@/lib/auth/use-session";
 import { formatRelativeTime } from "@/lib/format";
 import { useDashboardStats, useDiagnoses } from "@/lib/hooks/use-diagnoses";
 import { t } from "@/lib/i18n/es";
@@ -41,11 +42,17 @@ function locationOf(d: AdminDiagnosis): string {
 }
 
 export default function HomePage() {
+  const { user } = useSession();
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
   const { data: recent, isLoading: recentLoading } = useDiagnoses({
     page: 0,
     size: 5,
   });
+
+  const firstName = user?.fullName?.trim().split(/\s+/)[0];
+  const pageTitle = firstName
+    ? t.home.greeting(firstName, new Date().getHours())
+    : t.home.title;
 
   const cards = [
     {
@@ -82,9 +89,19 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col gap-s3">
-      <PageHeader title={t.home.title} description={t.home.description} />
+      <section className="relative overflow-hidden rounded-3xl bg-forest-deep text-white p-s4 md:p-s5">
+        <LandscapeArt className="absolute inset-y-0 right-0 w-2/3 md:w-1/2 h-full opacity-70 [mask-image:linear-gradient(to_left,black_30%,transparent)]" />
+        <div className="relative z-10 max-w-2xl">
+          <h1 className="text-h5 md:text-h4 font-bold tracking-tight text-balance">
+            {pageTitle}
+          </h1>
+          <p className="text-base text-white/75 mt-s1 max-w-prose">
+            {t.home.description}
+          </p>
+        </div>
+      </section>
 
-      <StatStrip className="grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
+      <StatStrip className="rise rise-fast grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
         {cards.map((stat) => (
           <StatCell
             key={stat.label}
@@ -97,7 +114,7 @@ export default function HomePage() {
         ))}
       </StatStrip>
 
-      <div className="grid gap-s3 grid-cols-1 xl:grid-cols-3">
+      <div className="rise rise-fast rise-2 grid gap-s3 grid-cols-1 xl:grid-cols-3">
         {/* Diagnósticos recientes (real) */}
         <div className="xl:col-span-2 flex flex-col gap-s2">
           <div className="bg-white rounded-2xl border border-gray-5 p-s3 flex flex-col gap-s2">

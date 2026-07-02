@@ -61,7 +61,7 @@ export function NotificationsMenu() {
         // biome-ignore lint/a11y/noStaticElementInteractions: onMouseDown solo previene el blur del botón disparador; no es un handler de interacción del usuario
         <div
           ref={panelRef}
-          className="absolute right-0 top-[52px] z-50 w-[360px] max-h-[480px] bg-white border border-gray-5 rounded-2xl shadow-lg overflow-hidden flex flex-col"
+          className="pop-in origin-top-right absolute right-0 top-[52px] z-50 w-[360px] max-h-[480px] bg-white border border-gray-5 rounded-2xl shadow-lg overflow-hidden flex flex-col"
           // evita que el blur del botón cierre el panel antes del click
           onMouseDown={(e) => e.preventDefault()}
         >
